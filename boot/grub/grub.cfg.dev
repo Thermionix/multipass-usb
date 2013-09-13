@@ -1,8 +1,9 @@
+
 menuentry "ubuntu-12.04.3-server-amd64.iso" {
 	set isofile="$isopath/ubuntu-12.04.3-server-amd64.iso"
 	loopback loop $isofile 
 	set gfxpayload=keep
-	linux   (loop)/install/vmlinuz file=/cdrom/preseed/ubuntu-server.seed iso-scan/filename=$isofile quiet --
+	linux   (loop)/install/vmlinuz file=/cdrom/preseed/ubuntu-server.seed iso-scan/filename=$isofile --
 	initrd  (loop)/install/initrd.gz
 }
 
@@ -27,13 +28,6 @@ menuentry "archlinux-2013.08-1-archboot-network.iso" {
 	initrd (loop)/boot/initramfs_x86_64.img
 }
 
-menuentry "archlinux-2013.08.01-dual.iso" {
-	set isofile="$isopath/archlinux-2013.08.01-dual.iso"
-	loopback loop $isofile
-	linux (loop)/arch/boot/x86_64/vmlinuz archisobasedir=arch archisolabel=ARCH_201308 img_dev=/dev/disk/by-label/$drive_label img_loop=$isofile earlymodules=loop noeject noprompt
-	initrd (loop)/arch/boot/x86_64/archiso.img
-}
-
 menuentry "debian-7.1.0-amd64-netinst.iso" {
 	set isofile="$isopath/debian-7.1.0-amd64-netinst.iso"
 	loopback loop $isofile
@@ -48,20 +42,11 @@ menuentry "openSUSE-12.3-NET-x86_64.iso" {
 	initrd (loop)/boot/x86_64/loader/initrd
 }
 
-
 menuentry "linuxmint-14-mate-dvd-oem-64bit.iso" {
 	set isofile="$isopath/linuxmint-14-mate-dvd-oem-64bit.iso"
 	loopback loop $isofile
 	linux (loop)/casper/vmlinuz file=/cdrom/preseed/mint.seed oem-config/enable=true only-ubiquity boot=casper iso-scan/filename=$isofile quiet splash noprompt --
 	initrd (loop)/casper/initrd.lz
-}
-
-menuentry "ubuntu-12.04.1-server-amd64" {
-    set isofile="$isopath/ubuntu-12.04.1-server-amd64.iso"
-    loopback loop $isofile 
-    set gfxpayload=keep
-    linux   (loop)/install/vmlinuz file=/cdrom/preseed/ubuntu-server.seed iso-scan/filename=$isofile quiet --
-    initrd  (loop)/install/initrd.gz
 }
 
 menuentry "linuxmint-14.1-mate-dvd-64bit.iso" {
