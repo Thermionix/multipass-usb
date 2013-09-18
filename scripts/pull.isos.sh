@@ -16,39 +16,29 @@ PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/de
 echo "# RSS: $PROJECTRSS"
 LATESTISO=`curl -s $PROJECTRSS | grep "<title>" | egrep -m 1 -o "$ISO_REGEX"`
 echo "# Latest ISO match: $LATESTISO"
-echo "wget http://downloads.sourceforge.net/$PROJECTNAME/$LATESTISO"
 
-# /(\/project\/showfiles.php\?group_id=\d+)/
-
-#      <link>http://sourceforge.net/projects/partedmagic/files/Stable/Parted%20Magic%202013_06_15/pmagic_2013_06_15.iso/download</link>
-
-
-#cat $cur_iso.md5sum
-# compare with
-#curl $md5_addr
-
-#if diff
+## if [ $LATESTISO != $CURRENTISO ] ; then
+read -e -n1 -p "download $LATESTISO [Y/n]: " OPTION
+if [ "$OPTION" == "y" ] || [ "$OPTION" == "" ]; then
 	#rm $cur_iso
 	#rm $cur_iso.md5sum
 
-	#new_iso = wget_name
-	#wget $ftp_addr ../iso/$new_iso
-	#wget $md5_addr | grep $new_iso | ../iso/$new_iso.md5sum
+	echo "## Downloading $LATESTISO"
 
-	# md5sum $new_iso 
-		# check against 
-	# cat $new_iso.md5sum
+	# if is sourceforge project
+		echo "wget http://downloads.sourceforge.net/$PROJECTNAME/$LATESTISO"
+		## Insert magic here to get MD5sum from sourceforge
+		# /(\/project\/showfiles.php\?group_id=\d+)/
+	# else
+		#wget $ftp_addr ../iso/$new_iso
+		#wget $md5_addr | grep $new_iso | ../iso/$new_iso.md5sum
+	#fi
+	#newmd5=$(/sbin/md5 "$LATESTISO" | /usr/bin/cut -f 2 -d "=")
+
+	# md5sum $new_iso
 	#if failed_checksum #ask download again?
 
 	#sed 's/cur_iso/new_iso/' ../boot/grub/grub.cfg
-#fi
 
+fi
 
-#  curl -L -v  $url -o $outputfile 2>> logfile.txt
-#  # use $(..) instead of backticks.
-#  calculated_md5=$(/sbin/md5 "$file" | /usr/bin/cut -f 2 -d "=")
-  # compare md5
-#  case "$calculated_md5" in "$md5" )
-#      echo "md5 ok"
-#      echo "do something else here";;
-#  esac
