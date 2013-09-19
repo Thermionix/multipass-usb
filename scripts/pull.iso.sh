@@ -18,8 +18,11 @@ function usage() {
 	echo "#       if not specified we'll use the remote pattern to try locate the local file"
 	echo "# --remote-md5 <filename> *optional*"
 	echo "#       filename in FTP directory containing md5sum for the ISO"
-	echo "# --outdir directory *optional*"
+	echo "# --outdir <directory> *optional*"
 	echo "#       directory containing ISOs, defaults to ../iso/"
+	echo "# --grub-cfg <grub.cfg> *optional*"
+	echo "#     e.g. ../boot/grub/grub.cfg"
+	echo "#       if specified will try update ISO filename in grub.cfg"
 	exit
 }
 
@@ -39,12 +42,16 @@ while [[ $1 = -* ]]; do
             LOCAL_REGEX="$1"
             shift
             ;;
+        --remote-md5)
+            REMOTE_MD5="$1"
+            shift
+            ;;
         --outdir)
             ISODIR="$1"
             shift
             ;;
-        --update-grub)
-            UPDATEGRUB=TRUE
+        --grub-cfg)
+            GRUBCFG=TRUE
             ;;
 		--help)
 			usage
@@ -61,8 +68,6 @@ if [ -z "$REMOTE_URL" ]; then
 	usage
 fi
 
-echo "## begin pull.iso.sh url: $REMOTE_URL"
-
 if [ -z "$REMOTE_REGEX" ]; then
 	echo "# --remote-regex not defined"
 	usage
@@ -75,8 +80,8 @@ fi
 CURRENTISO=`ls $ISODIR | grep -m 1 -oP "$LOCAL_REGEX"`
 if [ -z "$CURRENTISO" ]; then
 	echo "# Could not find current iso (Using $LOCAL_REGEX)"
-	read -e -n1 -p "Continue [y/N]: " OPTION
-	if [ "$OPTION" == "n" ] || [ "$OPTION" == "" ]; then
+	read -e -n1 -p "Continue [Y/n]: " OPTION
+	if [ "$OPTION" == "n" ] || [ "$OPTION" != "" ]; then
 		exit
 	fi
 fi
@@ -103,45 +108,72 @@ else
 		echo "# $REMOTE_URL not FTP"
 		exit
 	fi
-	LATESTISO=`curl --connect-timeout 10 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
+	LATESTISO=`curl --verbose --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
+
+	# if [ ! -z REMOTE_MD5 ] ; then
 	##wget $md5_addr | grep $new_iso | $ISODIR$new_iso.md5sum
+	#LATEST_MD5=""
+	# fi
 fi
 
-echo "# Latest ISO match: $LATESTISO"
-echo "# Current ISO match: $CURRENTISO"
-exit
+if [ "$LATESTISO" == "" ] ; then
+	echo "# Unable to determine latest remote filename, exiting"
+	exit
+else
+	echo "# Latest ISO match: $LATESTISO"
+fi
 
-if [ "$LATESTISO" != "$CURRENTISO" ] ; then
+if [ ! -z $CURRENTISO ]; then
+	echo "# Current ISO match: $CURRENTISO"
+fi
+
+if [ "$LATESTISO" == "$CURRENTISO" ] ; then
+	echo "# ISO filenames match, exiting"
+	exit
+else
 	echo "# Unable to match ISO filename to latest available"
 	read -e -n1 -p "download $LATESTISO [Y/n]: " OPTION
 	if [ "$OPTION" == "y" ] || [ "$OPTION" == "" ]; then
 
-		#pushd $ISODIR
-			#rm $CURRENTISO
-			#rm $CURRENTISO.md5sum
+		pushd $ISODIR
+			if [ ! -z $CURRENTISO ]; then
+				rm $CURRENTISO
+				rm $CURRENTISO.md5sum
+			fi
 
-			echo "## Downloading $LATEST_REMOTE"
+			wget $LATEST_REMOTE
 
-			#wget $LATEST_URL
+			if [ $? -ne 0 ] ; then
+				echo "# Download error, exiting"
+				exit
+			fi
 
-			#newmd5=$(/sbin/md5 "$LATESTISO" | /usr/bin/cut -f 2 -d "=")
-		#popd
+			if [ -f $LATESTISO ] ; then
+				echo "# generating $LATESTISO.md5"
+				md5sum $LATESTISO | cut -d " " -f 1 > $LATESTISO.md5
+			fi
 
-		#if [ -z $md5sum ] ; then
-			#echo "md5sum is undefined, unable to verify ISO"
-		#else
-			#if failed_checksum #ask download again?
-			
-			#fi
-		#fi
+			if [ -f $LATESTISO.md5 ] ; then
+				if [ -z $LATEST_MD5 ] ; then
+					echo "# no remote md5sum, unable to verify ISO"
+				else
+					if [ `cat $LATESTISO.md5` != $LATEST_MD5 ] ; then
+						echo "# MD5 CHECKSUM COMPARISON FAILED, exiting"
+						exit
+					fi
+				fi
+			fi
+		popd
 
-		#if [ $UPDATEGRUB == true ] ; then
-		#if $CURRENTISO undefined
-			#try regex sed over grub.cfg?
-		#else
-			#sed "s/$CURRENTISO/$LATESTISO/" ../boot/grub/grub.cfg
-		#fi
-		#fi
+		if [ ! -z "$GRUBCFG" ] ; then
+			if [ -z "$CURRENTISO" ]; then
+				echo "# attempting to replace filename using regex in grub.cfg"
+				#try regex sed over $GRUBCFG
+			else
+				echo "# updating grub.cfg"
+				sed "s/$CURRENTISO/$LATESTISO/" $GRUBCFG
+			fi
+		fi
 	fi
 fi
 
