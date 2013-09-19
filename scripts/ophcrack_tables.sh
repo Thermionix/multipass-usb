@@ -1,13 +1,14 @@
 #!/bin/bash
 
-pushd ../tables/
+function download_table() {
+	tablename=$1
+	pushd ../tables/
+	wget -O $tablename http://downloads.sourceforge.net/ophcrack/$tablename &&
+	unzip $tablename -d `basename $tablename .zip`
+	popd
+}
 
-tablesXP=tables_xp_free_small.zip
-wget -O $tablesXP http://downloads.sourceforge.net/ophcrack/$tablesXP &&
-unzip $tablesXP -d `basename $tablesXP .zip`
+download_table tables_xp_free_small.zip
 
-tablesVISTA=tables_vista_free.zip
-wget -O $tablesVISTA http://downloads.sourceforge.net/ophcrack/tables_vista_free.zip &&
-unzip $tablesVISTA -d `basename $tablesVISTA .zip`
+download_table tables_vista_free.zip
 
-popd
