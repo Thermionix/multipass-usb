@@ -18,6 +18,7 @@ function usage() {
 	echo "#       if not specified we'll use the remote pattern to try locate the local file"
 	echo "# --remote-md5 <filename> *optional*"
 	echo "#       filename in FTP directory containing md5sum for the ISO"
+	echo "#       if begins with a . we will append the remote filename to it"
 	echo "# --outdir <directory> *optional*"
 	echo "#       directory containing ISOs, defaults to ../iso/"
 	echo "# --grub-cfg <grub.cfg> *optional*"
@@ -96,7 +97,7 @@ if [ $? -eq 0 ]; then
 	echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
 	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/250/rss"
 	echo "# RSS: $PROJECTRSS"
-	LATESTISO=`curl -s $PROJECTRSS | grep "<title>" | grep -m 1 -oP "$REMOTE_REGEX"`
+	LATESTISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oP "$REMOTE_REGEX"`
 	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATESTISO"
 
 	## Insert magic here to get MD5sum from sourceforge
@@ -108,9 +109,10 @@ else
 		echo "# $REMOTE_URL not FTP"
 		exit
 	fi
-	LATESTISO=`curl --verbose --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
+	LATESTISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
 
-	# if [ ! -z REMOTE_MD5 ] ; then
+	# if [ ! -z $REMOTE_MD5 ] ; then
+	# if $REMOTE_MD5 startswith ^. try curl $LATESTISO$REMOTE_MD5
 	##wget $md5_addr | grep $new_iso | $ISODIR$new_iso.md5sum
 	#LATEST_MD5=""
 	# fi
