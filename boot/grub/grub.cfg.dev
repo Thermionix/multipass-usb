@@ -1,4 +1,26 @@
 
+menuentry "pmagic_2013_06_15.iso (Default 32 Runs from RAM)" {
+	set isofile="$isopath/pmagic_2013_06_15.iso"
+	loopback loop $isofile
+	linux (loop)/pmagic/bzImage iso_filename=$isofile edd=off load_ramdisk=1 prompt_ramdisk=0 rw vga=normal loglevel=9 max_loop=256 vmalloc=256MiB --
+	initrd (loop)/pmagic/initrd.img
+}
+
+menuentry "pmagic_2013_06_15.iso (Default 64 Runs from RAM)" {
+	set isofile="$isopath/pmagic_2013_06_15.iso"
+	loopback loop $isofile
+	linux (loop)/pmagic/bzImage64 iso_filename=$isofile edd=off load_ramdisk=1 prompt_ramdisk=0 rw vga=normal loglevel=9 max_loop=256 vmalloc=384MiB --
+	initrd (loop)/pmagic/initrd.img
+}
+
+menuentry "pmagic_2013_06_15.iso (Console)" {
+	set isofile="$isopath/pmagic_2013_06_15.iso"
+	loopback loop $isofile
+	linux (loop)/pmagic/bzImage iso_filename=$isofile edd=off load_ramdisk=1 prompt_ramdisk=0 rw vga=normal consoleboot max_loop=256 vmalloc=256MiB loglevel=9 --
+	initrd (loop)/pmagic/initrd.img
+}
+
+
 menuentry "ubuntu-12.04.3-server-amd64.iso" {
 	set isofile="$isopath/ubuntu-12.04.3-server-amd64.iso"
 	loopback loop $isofile 

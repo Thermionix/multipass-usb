@@ -2,7 +2,7 @@
 
 grubfile="../boot/grub/grub.cfg"
 
-bash pull.iso.sh --remote-url "ftp://ftp.iinet.net.au/linux/linuxmint/debian/" --remote-regex "linuxmint(.*?)mate(.*?)64(.*?).iso" --remote-md5 "md5sums.txt" --grub-cfg $grubfile
+#bash pull.iso.sh --remote-url "ftp://ftp.iinet.net.au/linux/linuxmint/debian/" --remote-regex "linuxmint(.*?)mate(.*?)64(.*?).iso" --remote-md5 "md5sums.txt" --grub-cfg $grubfile
 bash pull.iso.sh --remote-url "ftp://ftp.iinet.net.au/linux/archlinux/iso/latest/" --remote-regex "archlinux-(.*?)-dual.iso" --remote-md5 "md5sums.txt" --grub-cfg $grubfile
 
 #ftp://ftp.iinet.net.au/linux/linuxmint/stable/  /15/ recursive? organise by time? linuxmint-15-mate-dvd-64bit.iso
