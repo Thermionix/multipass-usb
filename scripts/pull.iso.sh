@@ -52,7 +52,8 @@ while [[ $1 = -* ]]; do
             shift
             ;;
         --grub-cfg)
-            GRUBCFG=TRUE
+            GRUB_CFG="$1"
+			shift
             ;;
 		--help)
 			usage
@@ -109,11 +110,14 @@ else
 
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATESTISO"
 
-	# if [ ! -z $REMOTE_MD5 ] ; then
-	# if $REMOTE_MD5 startswith ^. try curl $LATESTISO$REMOTE_MD5
-	##wget $md5_addr | grep $new_iso | $ISODIR$new_iso.md5sum
-	#LATEST_MD5=""
-	# fi
+	if [ ! -z $REMOTE_MD5 ] ; then
+		if echo "$REMOTE_MD5" | grep -qP "^." ; then
+			REMOTE_MD5=$LATESTISO$REMOTE_MD5
+		fi
+
+		LATEST_MD5=`curl -s --disable-epsv --max-time 30 "$REMOTE_URL$REMOTE_MD5" | grep -m 1 $LATESTISO | cut -d " " -f 1`
+		echo "# Remote MD5: $LATEST_MD5"
+	fi
 fi
 
 if [ "$LATESTISO" == "" ] ; then
@@ -170,13 +174,13 @@ else
 			fi
 		popd
 
-		if [ ! -z "$GRUBCFG" ] ; then
+		if [ ! -z "$GRUB_CFG" ] ; then
 			if [ -z "$CURRENTISO" ]; then
 				echo "# attempting to replace filename using regex in grub.cfg"
-				#try regex sed over $GRUBCFG
+				sed -i -e "s|$LOCAL_REGEX|$LATESTISO|" $GRUB_CFG
 			else
 				echo "# updating grub.cfg"
-				sed "s/$CURRENTISO/$LATESTISO/" $GRUBCFG
+				sed -i -e "s/$CURRENTISO/$LATESTISO/" $GRUB_CFG
 			fi
 		fi
 	fi
