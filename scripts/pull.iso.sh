@@ -80,11 +80,7 @@ fi
 
 CURRENTISO=`ls $ISODIR | grep -m 1 -oP "$LOCAL_REGEX"`
 if [ -z "$CURRENTISO" ]; then
-	echo "# Could not find current iso (Using $LOCAL_REGEX)"
-	read -e -n1 -p "Continue [Y/n]: " OPTION
-	if [ "$OPTION" == "n" ] || [ "$OPTION" != "" ]; then
-		exit
-	fi
+	echo "# Could not match local iso using $LOCAL_REGEX"
 fi
 
 SOURCEFORGE_CHECK=`echo "$REMOTE_URL" | grep "sourceforge.net"`
@@ -111,6 +107,8 @@ else
 	fi
 	LATESTISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
 
+	LATEST_REMOTE="${REMOTE_URL%/}/$LATESTISO"
+
 	# if [ ! -z $REMOTE_MD5 ] ; then
 	# if $REMOTE_MD5 startswith ^. try curl $LATESTISO$REMOTE_MD5
 	##wget $md5_addr | grep $new_iso | $ISODIR$new_iso.md5sum
@@ -122,18 +120,23 @@ if [ "$LATESTISO" == "" ] ; then
 	echo "# Unable to determine latest remote filename, exiting"
 	exit
 else
-	echo "# Latest ISO match: $LATESTISO"
+	echo "# Remote ISO match: $LATESTISO"
 fi
 
 if [ ! -z $CURRENTISO ]; then
-	echo "# Current ISO match: $CURRENTISO"
+	echo "# Local ISO match: $CURRENTISO"
 fi
 
 if [ "$LATESTISO" == "$CURRENTISO" ] ; then
-	echo "# ISO filenames match, exiting"
+	echo "# Remote & Local ISO filenames match, exiting"
 	exit
 else
-	echo "# Unable to match ISO filename to latest available"
+	if [ -z $CURRENTISO ]; then
+		echo "# Local Filename was not matched"
+	else
+		echo "# Remote & Local Filenames different"
+	fi
+
 	read -e -n1 -p "download $LATESTISO [Y/n]: " OPTION
 	if [ "$OPTION" == "y" ] || [ "$OPTION" == "" ]; then
 
