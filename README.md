@@ -9,4 +9,4 @@ bootable media live under /iso/
 
 use /scripts/ophcrack_tables.sh to populate /tables/ for ophcrack livecd
 
-checkout /boot/grub/grub.cfg for loopback entries
+checkout /boot/grub.entries.cfg for loopback entries
