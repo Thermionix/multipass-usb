@@ -1,6 +1,6 @@
 #!/bin/bash
 
-grubfile="../boot/grub/grub.cfg"
+grubfile="../boot/grub.entries.cfg"
 
 #bash pull.iso.sh --remote-url "ftp://ftp.iinet.net.au/linux/linuxmint/debian/" --remote-regex "linuxmint(.*?)mate(.*?)64(.*?).iso" --remote-md5 "md5sums.txt" --grub-cfg $grubfile
 bash pull.iso.sh --remote-url "ftp://ftp.iinet.net.au/linux/archlinux/iso/latest/" --remote-regex "archlinux-(.*?)-dual.iso" --remote-md5 "md5sums.txt" --grub-cfg $grubfile
