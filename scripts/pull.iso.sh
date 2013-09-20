@@ -1,5 +1,7 @@
 #!/bin/sh
 
+bash dependencies.sh curl wget coreutils
+
 function usage() {
 	echo "### pull.iso.sh usage"
 	echo "# Supports retrieving/updating an ISO from sourceforge or ftp server"

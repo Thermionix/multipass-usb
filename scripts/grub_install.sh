@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+
+# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/grub_install.sh)"
+
+bash dependencies.sh parted syslinux grub git
 
 echo "## listing available disks"
 sudo parted --list | egrep "^Disk /"
@@ -29,6 +33,9 @@ read -p "Press [Enter] key to continue"
  
 sudo grub-install --no-floppy --root-directory=$tmpdir ${blockdevice}
 
-sudo apt-get install syslinux
 cp /usr/lib/syslinux/memdisk $tmpdir/grub/boot/
 cp /boot/grub/fonts/unicode.pf2 $tmpdir/grub/boot/
+
+#pushd $tmpdir
+#git clone https://github.com/Thermionix/multipass-usb.git
+#popd
