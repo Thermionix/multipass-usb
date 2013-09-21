@@ -11,10 +11,10 @@ read -e -p "Set disk to install to: " -i "sd" DSK
 blockdevice=/dev/${DSK}
 labelpart="multipass01"
 tmpdir=/tmp/$labelpart
-labelboot="boot"
+labelboot="multipass01"
 partboot="/dev/disk/by-partlabel/$labelboot"
 
-read -p "## WILL COMPLETELY WIPE $blockdevice"
+echo "## WILL COMPLETELY WIPE $blockdevice"
 read -p "Press [Enter] key to continue"
 
 echo "## creating partition bios_grub"
@@ -25,7 +25,9 @@ echo "## creating partition $labelboot"
 sudo parted -s ${blockdevice} -a optimal unit MB -- mkpart primary 2 -1
 sudo parted -s ${blockdevice} name 2 $labelboot
 
-sudo mkfs.vfat -n $labelpart $partboot
+sudo mkfs.ext4 -n $labelpart $partboot
+
+sudo mkdir $tmpdir
 
 sudo mount $partboot $tmpdir
 
