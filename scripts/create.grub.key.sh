@@ -8,12 +8,14 @@ if [ ! -f dependencies.sh ] ; then
 	read -p "Press [Enter] key to continue"
 else
 	bash dependencies.sh parted syslinux grub git
-	if [[ $? -ne 0 ]]; then exit
+	if [[ $? -ne 0 ]]; then exit ; fi
 fi
 
 echo "## listing available disks"
 sudo parted --list | egrep "^Disk /"
 read -e -p "Set disk to install to: " -i "sd" DSK
+
+exit
 
 blockdevice=/dev/${DSK}
 

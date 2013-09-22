@@ -25,9 +25,8 @@ while [[ ! -z $1 ]]; do
 		if [[ `pacman -Qqe | grep "${dep}"` ]]; then
 			continue
 		fi
-	else
-		PKGSTOINSTALL=$PKGSTOINSTALL" "${dep}
 	fi
+	PKGSTOINSTALL=$PKGSTOINSTALL" "${dep}
 done
 
 # If some dependencies are missing, asks if user wants to install
