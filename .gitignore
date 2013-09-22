@@ -1,2 +1,6 @@
 boot
 tables
+iso/*.bin
+iso/*.img
+iso/*.iso
+iso/*.md5
