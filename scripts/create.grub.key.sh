@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/grub_install.sh)"
+# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/create.grub.key.sh)"
 
+#if [ ! -f dependencies.sh ] ; then
 bash dependencies.sh parted syslinux grub git
 
 echo "## listing available disks"
