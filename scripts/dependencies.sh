@@ -11,8 +11,10 @@ while [[ ! -z $1 ]]; do
 	dep=$1; shift
 	echo "checking for dependency ${dep}"
 	# Debian, Ubuntu etc...
-	if [[ `dpkg -l | grep -w "ii\s*${dep} "` ]]; then
-		continue
+	if which dpkg &> /dev/null; then
+		if [[ `dpkg -l | grep -w "ii\s*${dep} "` ]]; then
+			continue
+		fi
 	# OpenSuse, Mandriva, Fedora, CentOs, ecc. (with rpm)
 	elif which rpm &> /dev/null; then
 		if [[ `rpm -q ${dep}` ]]; then
