@@ -68,5 +68,6 @@ if [ "$PKGSTOINSTALL" != "" ]; then
 	# Else, if user don't want to install missing dependencies
 	else
 		echo "WARNING: Some dependencies may be missing. So, please, install manually ${PKGSTOINSTALL}."
+		exit 1
 	fi
 fi

@@ -3,10 +3,10 @@ multipass-usb
 
 GRUB2 + USB pendrive + ISOs
 
-use /scripts/grub_install.sh to setup the pendrive
+use /scripts/create.grub.key.sh to setup the pendrive
 
-bootable media live under /iso/
+bootable media stored under /iso/
+*.grub.cfg in /iso/ are concatenated into /boot/grub/grub.cfg by /scripts/gen.grub.cfg.sh
 
-use /scripts/ophcrack_tables.sh to populate /tables/ for ophcrack livecd
+use /scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
 
-checkout /boot/grub.entries.cfg for loopback entries

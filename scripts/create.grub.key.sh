@@ -2,8 +2,14 @@
 
 # bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/create.grub.key.sh)"
 
-#if [ ! -f dependencies.sh ] ; then
-bash dependencies.sh parted syslinux grub git
+if [ ! -f dependencies.sh ] ; then
+	echo "unable to verify dependencies, please ensure the following are installed"
+	echo "parted syslinux grub git"
+	read -p "Press [Enter] key to continue"
+else
+	bash dependencies.sh parted syslinux grub git
+	if [[ $? -ne 0 ]]; then exit
+fi
 
 echo "## listing available disks"
 sudo parted --list | egrep "^Disk /"
