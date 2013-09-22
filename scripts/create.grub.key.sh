@@ -15,8 +15,6 @@ echo "## listing available disks"
 sudo parted --list | egrep "^Disk /"
 read -e -p "Set disk to install to: " -i "sd" DSK
 
-exit
-
 blockdevice=/dev/${DSK}
 
 drivelabel="multipass01"
