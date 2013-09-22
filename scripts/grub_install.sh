@@ -9,12 +9,12 @@ sudo parted --list | egrep "^Disk /"
 read -e -p "Set disk to install to: " -i "sd" DSK
 
 blockdevice=/dev/${DSK}
-labelpart="multipass01"
-tmpdir=/tmp/$labelpart
-labelboot="boot"
-partboot="/dev/disk/by-partlabel/$labelboot"
 
-read -p "## WILL COMPLETELY WIPE $blockdevice"
+labelboot="multipass01"
+partboot="/dev/disk/by-partlabel/$labelboot"
+tmpdir=/tmp/$labelboot
+
+echo "## WILL COMPLETELY WIPE $blockdevice"
 read -p "Press [Enter] key to continue"
 
 echo "## creating partition bios_grub"
@@ -25,17 +25,29 @@ echo "## creating partition $labelboot"
 sudo parted -s ${blockdevice} -a optimal unit MB -- mkpart primary 2 -1
 sudo parted -s ${blockdevice} name 2 $labelboot
 
-sudo mkfs.vfat -n $labelpart $partboot
+sleep 1
+sudo mkfs.ext4 $partboot
+
+sudo mkdir -p $tmpdir
 
 sudo mount $partboot $tmpdir
 
-read -p "Press [Enter] key to continue"
- 
+sudo chown -R `whoami` $tmpdir
+
+pushd $tmpdir
+	git init .
+	git remote add -t \* -f origin https://github.com/Thermionix/multipass-usb.git
+	git fetch
+	git checkout master
+popd
+
 sudo grub-install --no-floppy --root-directory=$tmpdir ${blockdevice}
 
-cp /usr/lib/syslinux/memdisk $tmpdir/grub/boot/
-cp /boot/grub/fonts/unicode.pf2 $tmpdir/grub/boot/
+sleep 1
 
-#pushd $tmpdir
-#git clone https://github.com/Thermionix/multipass-usb.git
-#popd
+cp /usr/lib/syslinux/memdisk $tmpdir/boot/grub/
+
+
+echo "## will unmount $partboot when ready"
+read -p "Press [Enter] key to continue"
+sudo umount $tmpdir
