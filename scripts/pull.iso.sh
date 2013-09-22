@@ -161,14 +161,14 @@ else
 
 			if [ -f $LATESTISO ] ; then
 				echo "# generating $LATESTISO.md5"
-				md5sum $LATESTISO | cut -d " " -f 1 > $LATESTISO.md5
+				md5sum $LATESTISO > $LATESTISO.md5
 			fi
 
 			if [ -f $LATESTISO.md5 ] ; then
 				if [ -z $LATEST_MD5 ] ; then
 					echo "# no remote md5sum, unable to verify ISO"
 				else
-					if [ `cat $LATESTISO.md5` != $LATEST_MD5 ] ; then
+					if [ `cat $LATESTISO.md5 | cut -d " " -f 1` != $LATEST_MD5 ] ; then
 						echo "# MD5 CHECKSUM COMPARISON FAILED, exiting"
 						exit
 					fi
