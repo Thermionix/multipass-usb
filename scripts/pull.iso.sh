@@ -1,6 +1,9 @@
 #!/bin/sh
 
-bash dependencies.sh curl wget coreutils
+command -v whiptail > /dev/null || { echo "## please install whiptail" ; exit 1 ; }
+command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
+command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
+command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
 
 function usage() {
 	echo "### pull.iso.sh usage"
@@ -23,9 +26,6 @@ function usage() {
 	echo "#       if begins with a . we will append the remote filename to it"
 	echo "# --outdir <directory> *optional*"
 	echo "#       directory containing ISOs, defaults to ../iso/"
-	echo "# --grub-cfg <grub.cfg> *optional*"
-	echo "#     e.g. ../boot/grub/grub.cfg"
-	echo "#       if specified will try update ISO filename in grub.cfg"
 	exit
 }
 
@@ -52,10 +52,6 @@ while [[ $1 = -* ]]; do
         --outdir)
             ISODIR="$1"
             shift
-            ;;
-        --grub-cfg)
-            GRUB_CFG="$1"
-			shift
             ;;
 		--help)
 			usage
@@ -143,9 +139,7 @@ else
 		echo "# Remote & Local Filenames different"
 	fi
 
-	read -e -n1 -p "download $LATESTISO [Y/n]: " OPTION
-	if [ "$OPTION" == "y" ] || [ "$OPTION" == "" ]; then
-
+	if whiptail --yesno "download $LATESTISO?" 8 65 ; then
 		pushd $ISODIR
 			if [ ! -z $CURRENTISO ]; then
 				rm $CURRENTISO
@@ -174,17 +168,8 @@ else
 					fi
 				fi
 			fi
+			#echo "REPLACED $CURRENTISO WITH $LATESTISO
 		popd
-
-		if [ ! -z "$GRUB_CFG" ] ; then
-			if [ -z "$CURRENTISO" ]; then
-				echo "# attempting to replace filename using regex in grub.cfg"
-				sed -i -e "s|$LOCAL_REGEX|$LATESTISO|" $GRUB_CFG
-			else
-				echo "# updating grub.cfg"
-				sed -i -e "s/$CURRENTISO/$LATESTISO/" $GRUB_CFG
-			fi
-		fi
 	fi
 fi
 

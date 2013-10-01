@@ -2,14 +2,10 @@
 
 # bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/create.grub.key.sh)"
 
-if [ ! -f dependencies.sh ] ; then
-	echo "unable to verify dependencies, please ensure the following are installed"
-	echo "parted syslinux grub git"
-	read -p "Press [Enter] key to continue"
-else
-	bash dependencies.sh parted syslinux grub git
-	if [[ $? -ne 0 ]]; then exit ; fi
-fi
+command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
+command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
+command -v grub > /dev/null || { echo "## please install grub" ; exit 1 ; }
+command -v mdgit5sum > /dev/null || { echo "## please install git" ; exit 1 ; }
 
 echo "## listing available disks"
 sudo parted --list | egrep "^Disk /"
