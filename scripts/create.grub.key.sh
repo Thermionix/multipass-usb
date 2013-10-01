@@ -5,7 +5,7 @@
 command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
 command -v grub > /dev/null || { echo "## please install grub" ; exit 1 ; }
-command -v mdgit5sum > /dev/null || { echo "## please install git" ; exit 1 ; }
+command -v git > /dev/null || { echo "## please install git" ; exit 1 ; }
 
 echo "## listing available disks"
 sudo parted --list | egrep "^Disk /"
