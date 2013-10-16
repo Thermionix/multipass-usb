@@ -5,7 +5,7 @@ isodir="../iso"
 
 cat grub.head.cfg > $grubfile
 
-for f in `find $isodir -type f -name "*.grub.cfg" -printf "%f\n"`
+for f in `find $isodir -type f -name "*.grub.cfg" -printf "%f\n" | sort`
 do
 	filepath=`grep -P -m 1 "^\s*set iso_path=" $isodir/$f | cut -d "=" -f 2 | sed "s/\"//g"`
 	if [ "$filepath" != "" ] ; then
