@@ -4,50 +4,52 @@
 
 command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
-command -v grub > /dev/null || { echo "## please install grub" ; exit 1 ; }
+command -v grub-install > /dev/null || { echo "## please install grub" ; exit 1 ; }
 command -v git > /dev/null || { echo "## please install git" ; exit 1 ; }
 command -v exfatfsck > /dev/null || { echo "## please install exfat-utils" ; exit 1 ; }
 `command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required for this script" >&2 ; exit 1 ; }`
 
-disks=`parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
+disks=`sudo parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
 DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
-
-blockdevice=/dev/${DSK}
 
 drivelabel="multipass01"
 partboot="/dev/disk/by-partlabel/$drivelabel"
 tmpdir=/tmp/$drivelabel
 
-echo "## WILL COMPLETELY WIPE $blockdevice"
+echo "## WILL COMPLETELY WIPE ${DSK}"
 read -p "Press [Enter] key to continue"
 
 echo "## creating partition bios_grub"
-sudo parted -s ${blockdevice} mklabel gpt
-sudo parted -s ${blockdevice} -a optimal unit MB mkpart primary 1 2
-sudo parted -s ${blockdevice} set 1 bios_grub on
+sudo parted -s ${DSK} mklabel gpt
+sudo parted -s ${DSK} -a optimal unit MB mkpart primary 1 2
+sudo parted -s ${DSK} set 1 bios_grub on
 echo "## creating partition $drivelabel"
-sudo parted -s ${blockdevice} -a optimal unit MB -- mkpart primary 2 -1
-sudo parted -s ${blockdevice} name 2 $drivelabel
+sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 2 -1
+sudo parted -s ${DSK} name 2 $drivelabel
 
 sleep 1
-sudo mkfs.exfat -L "${drivelabel}" $partboot
+sudo mkfs.exfat -n "${drivelabel}" $partboot
 
 sudo mkdir -p $tmpdir
 
 sudo mount $partboot $tmpdir
 
-sudo grub-install --no-floppy --root-directory=$tmpdir ${blockdevice}
+if ( grep -q ${DSK} /etc/mtab ); then
+	echo "info: $partboot mounted at $tmpdir"
 
-sleep 1
+	sudo grub-install --no-floppy --root-directory=$tmpdir ${DSK}
 
-sudo chown -R `whoami` $tmpdir
+	sleep 1
 
-cp /usr/lib/syslinux/memdisk $tmpdir/boot/grub/
+	#sudo chown -R `whoami` $tmpdir
 
-pushd $tmpdir
-	git clone https://github.com/Thermionix/multipass-usb.git $drivelabel; shopt -s dotglob nullglob; mv $drivelabel/* .; rmdir $drivelabel
-popd
+	cp /usr/lib/syslinux/memdisk $tmpdir/boot/grub/
 
-echo "## will unmount $partboot when ready"
-read -p "Press [Enter] key to continue"
-sudo umount $tmpdir
+	pushd $tmpdir
+		git clone https://github.com/Thermionix/multipass-usb.git $drivelabel; shopt -s dotglob nullglob; mv $drivelabel/* .; rmdir $drivelabel
+	popd
+
+	echo "## will unmount $partboot when ready"
+	read -p "Press [Enter] key to continue"
+	sudo umount $tmpdir
+fi
