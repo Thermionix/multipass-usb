@@ -6,10 +6,11 @@ command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
 command -v grub > /dev/null || { echo "## please install grub" ; exit 1 ; }
 command -v git > /dev/null || { echo "## please install git" ; exit 1 ; }
+command -v exfatfsck > /dev/null || { echo "## please install exfat-utils" ; exit 1 ; }
+`command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required for this script" >&2 ; exit 1 ; }`
 
-echo "## listing available disks"
-sudo parted --list | egrep "^Disk /"
-read -e -p "Set disk to install to: " -i "sd" DSK
+disks=`parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
+DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
 
 blockdevice=/dev/${DSK}
 
@@ -29,7 +30,7 @@ sudo parted -s ${blockdevice} -a optimal unit MB -- mkpart primary 2 -1
 sudo parted -s ${blockdevice} name 2 $drivelabel
 
 sleep 1
-sudo mkfs.ext4 -L "${drivelabel}" $partboot
+sudo mkfs.exfat -L "${drivelabel}" $partboot
 
 sudo mkdir -p $tmpdir
 
