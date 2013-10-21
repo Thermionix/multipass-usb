@@ -6,8 +6,8 @@ command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
 command -v grub-install > /dev/null || { echo "## please install grub" ; exit 1 ; }
 command -v git > /dev/null || { echo "## please install git" ; exit 1 ; }
-command -v exfatfsck > /dev/null || { echo "## please install exfat-utils" ; exit 1 ; }
-`command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required for this script" >&2 ; exit 1 ; }`
+#command -v exfatfsck > /dev/null || { echo "## please install exfat-utils" ; exit 1 ; }
+command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required for this script" >&2 ; exit 1 ; }
 
 disks=`sudo parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
 DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
@@ -28,7 +28,8 @@ sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 2 -1
 sudo parted -s ${DSK} name 2 $drivelabel
 
 sleep 1
-sudo mkfs.exfat -n "${drivelabel}" $partboot
+#sudo mkfs.exfat -n "${drivelabel}" $partboot
+sudo mkfs.ext4 -L "${drivelabel}" $partboot
 
 sudo mkdir -p $tmpdir
 
@@ -41,7 +42,7 @@ if ( grep -q ${DSK} /etc/mtab ); then
 
 	sleep 1
 
-	#sudo chown -R `whoami` $tmpdir
+	sudo chown -R `whoami` $tmpdir
 
 	cp /usr/lib/syslinux/memdisk $tmpdir/boot/grub/
 
