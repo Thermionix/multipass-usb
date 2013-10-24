@@ -168,7 +168,7 @@ else
 					fi
 				fi
 			fi
-			#echo "REPLACED $CURRENTISO WITH $LATESTISO
+			echo "REPLACED $CURRENTISO WITH $LATESTISO"
 		popd
 	fi
 fi
