@@ -1,9 +1,10 @@
 #!/bin/bash
 
-grubfile="../boot/grub/grub.cfg"
-isodir="../iso"
+scriptdir=`dirname $0`
+grubfile=$scriptdir/../boot/grub/grub.cfg
+isodir=$scriptdir/../iso
 
-cat grub.head.cfg > $grubfile
+cat $scriptdir/grub.head.cfg > $grubfile
 
 for f in `find $isodir -type f -name "*.grub.cfg" -printf "%f\n" | sort`
 do
@@ -17,4 +18,4 @@ do
 	fi
 done
 
-cat grub.tail.cfg >> $grubfile
+cat $scriptdir/grub.tail.cfg >> $grubfile
