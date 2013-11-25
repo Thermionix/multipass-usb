@@ -30,6 +30,7 @@ sudo parted -s ${DSK} name 2 $drivelabel
 sleep 1
 #sudo mkfs.exfat -n "${drivelabel}" $partboot
 sudo mkfs.ext4 -L "${drivelabel}" $partboot
+#mkudffs --media-type=hd --blocksize=512 --utf8 --vid="${drivelabel}" $partboot
 
 sudo mkdir -p $tmpdir
 
