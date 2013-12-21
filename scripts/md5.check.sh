@@ -11,6 +11,7 @@ do
 	else
 		echo "generating $f.md5"
 		md5sum $f > $f.md5
+		cat $f.md5
 	fi
 done
 
