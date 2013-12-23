@@ -16,9 +16,15 @@ drivelabel="multipass01"
 partboot="/dev/disk/by-partlabel/$drivelabel"
 tmpdir=/tmp/$drivelabel
 
+enable_uefi=false
+if whiptail --defaultno --yesno "create for UEFI system?" 8 40 ; then
+	enable_uefi=true
+fi
+
 echo "## WILL COMPLETELY WIPE ${DSK}"
 read -p "Press [Enter] key to continue"
 
+#if $enable_uefi ; then
 echo "## creating partition bios_grub"
 sudo parted -s ${DSK} mklabel gpt
 sudo parted -s ${DSK} -a optimal unit MB mkpart primary 1 2
