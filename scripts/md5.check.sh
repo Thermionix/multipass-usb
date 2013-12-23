@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pushd ../iso/
+pushd ../bootisos/
 
 for f in `find . -type f \( -name "*.iso" -o -name "*.bin" -o -name "*.img" \) -printf "%f\n"`
 do
@@ -16,3 +16,5 @@ do
 done
 
 popd
+
+read -n 1 -p "Press any key to continue..."

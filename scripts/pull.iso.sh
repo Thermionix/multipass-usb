@@ -60,7 +60,7 @@ while [[ $1 = -* ]]; do
 done
 
 if [ -z "$ISODIR" ]; then
-	ISODIR=../iso/
+	ISODIR=../bootisos/
 fi
 
 if [ -z "$REMOTE_URL" ]; then

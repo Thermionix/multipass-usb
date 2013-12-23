@@ -60,6 +60,6 @@ if ( grep -q ${DSK} /etc/mtab ); then
 	echo "configfile /scripts/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
 
 	echo "## will unmount $partboot when ready"
-	read -p "Press [Enter] key to continue"
+	read -n 1 -p "Press any key to continue..."
 	sudo umount $tmpdir
 fi

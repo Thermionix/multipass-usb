@@ -1,5 +1,5 @@
 #!/bin/bash
-iso_path=../iso/
+iso_path=../bootisos/
 
 for f in `find $iso_path -type f -name "*.grub.cfg" -printf "%f\n"`
 do
@@ -28,5 +28,3 @@ do
 		fi
 	fi
 done
-
-bash gen.grub.cfg.sh
