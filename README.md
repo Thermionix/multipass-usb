@@ -11,4 +11,4 @@ bootable media are stored under /iso/
 
 use /scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
 
-test using qemu ``sudo umount /dev/disk/by-label/multipass01 ; sudo qemu -hda `readlink -f /dev/disk/by-label/multipass01 | sed 's/[0-9]*//g'` ``
+test using qemu ``sudo umount /dev/disk/by-label/multipass01 ; sudo qemu-system-x86_64 -drive file=`readlink -f /dev/disk/by-label/multipass01 | sed 's/[0-9]*//g'`,cache=none,if=virtio ``

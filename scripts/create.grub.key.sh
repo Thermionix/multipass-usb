@@ -36,6 +36,7 @@ sudo parted -s ${DSK} name 2 $drivelabel
 sleep 1
 #sudo mkfs.exfat -n "${drivelabel}" $partboot
 sudo mkfs.ext4 -L "${drivelabel}" $partboot
+#mkudffs --media-type=hd --blocksize=512 --utf8 --vid="${drivelabel}" $partboot
 
 sudo mkdir -p $tmpdir
 
@@ -55,6 +56,8 @@ if ( grep -q ${DSK} /etc/mtab ); then
 	pushd $tmpdir
 		git clone https://github.com/Thermionix/multipass-usb.git $drivelabel; shopt -s dotglob nullglob; mv $drivelabel/* .; rmdir $drivelabel
 	popd
+
+	echo "configfile /scripts/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
 
 	echo "## will unmount $partboot when ready"
 	read -p "Press [Enter] key to continue"
