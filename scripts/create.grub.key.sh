@@ -51,6 +51,8 @@ if ( grep -q ${DSK} /etc/mtab ); then
 		git clone https://github.com/Thermionix/multipass-usb.git $drivelabel; shopt -s dotglob nullglob; mv $drivelabel/* .; rmdir $drivelabel
 	popd
 
+	echo "configfile /scripts/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
+
 	echo "## will unmount $partboot when ready"
 	read -p "Press [Enter] key to continue"
 	sudo umount $tmpdir
