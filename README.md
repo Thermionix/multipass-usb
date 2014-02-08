@@ -8,8 +8,11 @@ use /scripts/create.grub.key.sh to setup the pendrive
 bootable media are stored under /bootisos/
 
 .iso files that support a loopback.cfg will be automatically added to the boot menu
+
 .bin files will be automatically added to the boot menu
+
 .img files will be automatically bootable via memdisk
+
 .cfg in /bootisos/ are also appended as bootable entries
 
 use /scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
