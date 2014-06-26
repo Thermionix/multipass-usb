@@ -1,0 +1,4 @@
+REMOTE_URL="http://sourceforge.net/projects/gparted/"
+REMOTE_REGEX="/gparted-live-stable(.*?)/\K(gparted-live(.*?)amd64.iso)"
+LOCAL_REGEX="gparted-live(.*?)amd64.iso"
+GRUB_CFG="gparted.iso.grub.cfg"
