@@ -5,9 +5,15 @@ GRUB2 + USB pendrive + ISOs
 
 use /scripts/create.grub.key.sh to setup the pendrive
 
-bootable media are stored under /iso/
+bootable media are stored under /bootisos/
 
-*.grub.cfg in /iso/ are concatenated into /boot/grub/grub.cfg by /scripts/gen.grub.cfg.sh
+.iso files that support a loopback.cfg will be automatically added to the boot menu
+
+.bin files will be automatically added to the boot menu
+
+.img files will be automatically bootable via memdisk
+
+.cfg in /bootisos/ are also appended as bootable entries
 
 use /scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
 
