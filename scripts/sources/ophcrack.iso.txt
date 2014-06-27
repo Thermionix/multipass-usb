@@ -1,0 +1,3 @@
+REMOTE_URL="http://sourceforge.net/projects/ophcrack/"
+REMOTE_REGEX="ophcrack-notables-livecd-(.*?).iso"
+GRUB_CFG="ophcrack.iso.grub.cfg"

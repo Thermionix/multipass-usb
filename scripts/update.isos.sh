@@ -23,10 +23,6 @@ function pull_sourceforge {
 
 	LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oP "$REMOTE_REGEX"`
 	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
-
-	## Insert magic here to get MD5sum from sourceforge
-	# /(\/project\/showfiles.php\?group_id=\d+)/
-	#LATEST_MD5=""
 }
 
 function pull_ftp {
@@ -38,11 +34,18 @@ function pull_ftp {
 	LATEST_ISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
 
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATEST_ISO"
+}
+
+function pull_md5 {
+	## Insert magic here to get MD5sum from sourceforge
+	# /(\/project\/showfiles.php\?group_id=\d+)/
+	#LATEST_MD5=""
 
 	if [ ! -z $REMOTE_MD5 ] ; then
-		#if echo "$REMOTE_MD5" | grep -qP "^." ; then
-		#	REMOTE_MD5=$LATEST_ISO$REMOTE_MD5
-		#fi
+		if echo "$REMOTE_MD5" | grep -qP "^." ; then
+			echo "# Remote MD5 is an extension, prefixing with ISO name"
+			REMOTE_MD5=$LATEST_ISO$REMOTE_MD5
+		fi
 
 		echo "# Attempting to get MD5 checksum from $REMOTE_URL$REMOTE_MD5"
 
@@ -66,6 +69,8 @@ function confirm {
 
 function download_remote_iso {
 	if confirm "download $LATEST_ISO? [y/N]" ; then
+		pull_md5
+
 		pushd $ISO_PATH
 			if [ -n $CURRENT_ISO_NAME ]; then
 				# TODO : confirm remove old files
