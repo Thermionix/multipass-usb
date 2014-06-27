@@ -18,7 +18,7 @@ function pull_sourceforge {
 	python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
 	echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
 
-	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/250/rss"
+	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/500/rss"
 	echo "# RSS: $PROJECTRSS"
 
 	LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oP "$REMOTE_REGEX"`
@@ -139,7 +139,10 @@ function check_remote {
 		pull_ftp
 	fi
 
-	if [ -n $LATEST_ISO ] ; then
+	if [ -z $LATEST_ISO ] ; then
+		echo "# Could not locate remote ISO information"
+		# TODO : Break ?
+	else
 		echo "# Latest Remote ISO: $LATEST_ISO"
 
 		check_local
