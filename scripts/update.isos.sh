@@ -3,7 +3,6 @@ ISO_PATH=../bootisos/
 SOURCES_PATH=./sources/
 
 function check_utilities {
-	command -v whiptail > /dev/null || { echo "## please install whiptail" ; exit 1 ; }
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 	command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
 	command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
@@ -41,20 +40,37 @@ function pull_ftp {
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATEST_ISO"
 
 	if [ ! -z $REMOTE_MD5 ] ; then
-		if echo "$REMOTE_MD5" | grep -qP "^." ; then
-			REMOTE_MD5=$LATEST_ISO$REMOTE_MD5
-		fi
+		#if echo "$REMOTE_MD5" | grep -qP "^." ; then
+		#	REMOTE_MD5=$LATEST_ISO$REMOTE_MD5
+		#fi
+
+		echo "# Attempting to get MD5 checksum from $REMOTE_URL$REMOTE_MD5"
 
 		LATEST_MD5=`curl -s --disable-epsv --max-time 30 "$REMOTE_URL$REMOTE_MD5" | grep -m 1 $LATEST_ISO | cut -d " " -f 1`
 		echo "# Remote MD5: $LATEST_MD5"
 	fi
 }
 
+function confirm {
+    # call with a prompt string or use a default
+    read -r -p "${1:-Are you sure? [y/N]} " response
+    case $response in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
 function download_remote_iso {
-	if whiptail --yesno "download $LATEST_ISO?" 8 65 ; then
+	if confirm "download $LATEST_ISO? [y/N]" ; then
 		pushd $ISO_PATH
-			if [ ! -z $CURRENT_ISO_NAME ]; then
+			if [ -n $CURRENT_ISO_NAME ]; then
+				# TODO : confirm remove old files
 				rm $CURRENT_ISO_NAME
+				# TODO : check if md5 file exists
 				rm $CURRENT_ISO_NAME.md5
 			fi
 
@@ -158,7 +174,7 @@ function load_sources {
 	for f in `find $SOURCES_PATH -type f -name "*.txt" -printf "%f\n"`
 	do
 		read_source $SOURCES_PATH$f
-		unset REMOTE_URL REMOTE_REGEX LOCAL_REGEX GRUB_CFG CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
+		unset REMOTE_URL REMOTE_REGEX REMOTE_MD5 LOCAL_REGEX GRUB_CFG CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
