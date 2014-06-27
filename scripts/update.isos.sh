@@ -112,11 +112,11 @@ function download_remote_iso {
 
 function check_local {
 	echo "# Checking $ISO_PATH using $LOCAL_REGEX"
-	CURRENT_ISO_NAME=`ls $ISO_PATH | grep -m 1 -oP "$LOCAL_REGEX"`
+	CURRENT_ISO_NAME=`ls -t $ISO_PATH | grep -m 1 -oP "$LOCAL_REGEX"`
 	if [ -z "$CURRENT_ISO_NAME" ]; then
 		echo "# Could not match local ISO!"
 	else
-		echo "# Local ISO matched: $ISO_PATH$CURRENT_ISO_NAME"
+		echo "# Local ISO matched: $CURRENT_ISO_NAME"
 	fi
 }
 
@@ -164,14 +164,15 @@ function read_source {
 	# TODO : Read in IGNORE=True ?
 	source $1
 	if [ -n $REMOTE_URL ] ; then
-		echo "## updating iso using values from: $f"
+		echo "#####################################"
+		echo "# updating iso using values from: $f"
 
 		if [ -z "$REMOTE_REGEX" ]; then
-			echo "# --remote-regex not defined"
+			echo "# REMOTE_REGEX not defined"
 			exit 1
 		fi
 		if [ -z "$LOCAL_REGEX" ]; then
-			echo "# Using --remote-regex as --local-regex"
+			#echo "# Using REMOTE_REGEX as LOCAL_REGEX"
 			LOCAL_REGEX=$REMOTE_REGEX
 		fi
 

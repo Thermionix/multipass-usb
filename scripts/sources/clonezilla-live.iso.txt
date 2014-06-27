@@ -1,4 +1,4 @@
 REMOTE_URL="http://sourceforge.net/projects/clonezilla/"
 REMOTE_REGEX="/clonezilla_live_stable/[0-9.-]+/\K(clonezilla-live-(.*?)-i686-pae.iso)"
-LOCAL_REGEX="clonezilla-live-(.*?)-i686-pae"
+LOCAL_REGEX="clonezilla-live-(.*?)-i686-pae.iso"
 GRUB_CFG="clonezilla-live.iso.grub.cfg"
