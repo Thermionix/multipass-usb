@@ -6,6 +6,7 @@ function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 	command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
 	command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
+	# TODO : check python
 }
 
 function pull_sourceforge {
@@ -72,7 +73,7 @@ function download_remote_iso {
 		pull_md5
 
 		pushd $ISO_PATH
-			if [ -n $CURRENT_ISO_NAME ]; then
+			if [ ! -z $CURRENT_ISO_NAME ]; then
 				# TODO : confirm remove old files
 				rm $CURRENT_ISO_NAME
 				# TODO : check if md5 file exists
