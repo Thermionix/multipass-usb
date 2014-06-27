@@ -12,10 +12,13 @@ function check_utilities {
 function pull_sourceforge {
 	PROJECTNAME=`echo $REMOTE_URL | grep -oPh 'projects/(.*?)/' |cut -f2 -d/`
 	echo "# Projectname $PROJECTNAME"
+
 	PROJECTJSON="http://sourceforge.net/api/project/name/$PROJECTNAME/json"
 	PROJECTID=`curl -s $PROJECTJSON|
+
 	python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
 	echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
+
 	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/250/rss"
 	echo "# RSS: $PROJECTRSS"
 
@@ -27,12 +30,12 @@ function pull_sourceforge {
 	#LATEST_MD5=""
 }
 
-function pull_iso {
-	FTPCHECK=`echo $REMOTE_URL | grep -P "^ftp://"`
-	if [ $? -ne 0 ] ; then
+function pull_ftp {
+	if ! `echo $REMOTE_URL | grep -q -P "^ftp://"` ; then
 		echo "# $REMOTE_URL not FTP"
 		exit
 	fi
+
 	LATEST_ISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
 
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATEST_ISO"
@@ -52,7 +55,7 @@ function download_remote_iso {
 		pushd $ISO_PATH
 			if [ ! -z $CURRENT_ISO_NAME ]; then
 				rm $CURRENT_ISO_NAME
-				rm $CURRENT_ISO_NAME.md5sum
+				rm $CURRENT_ISO_NAME.md5
 			fi
 
 			wget $LATEST_REMOTE
@@ -73,19 +76,25 @@ function download_remote_iso {
 				else
 					if [ `cat $LATEST_ISO.md5 | cut -d " " -f 1` != $LATEST_MD5 ] ; then
 						echo "# MD5 CHECKSUM COMPARISON FAILED, exiting"
+						echo "# You should delete this ISO and re-download"
+						# TODO : offer redownload?
 						exit
 					fi
 				fi
 			fi
 			echo "REPLACED $CURRENT_ISO_NAME WITH $LATEST_ISO"
+			update_source_grub
 		popd
 	fi
 }
 
 function check_local {
-	CURRENTISO=`ls $ISO_PATH | grep -m 1 -oP "$LOCAL_REGEX"`
+	echo "# Checking $ISO_PATH using $LOCAL_REGEX"
+	CURRENT_ISO_NAME=`ls $ISO_PATH | grep -m 1 -oP "$LOCAL_REGEX"`
 	if [ -z "$CURRENT_ISO_NAME" ]; then
-		echo "# Could not match local iso using $LOCAL_REGEX"
+		echo "# Could not match local ISO!"
+	else
+		echo "# Local ISO matched: $ISO_PATH$CURRENT_ISO_NAME"
 	fi
 }
 
@@ -103,27 +112,23 @@ function update_source_grub {
 }
 
 function check_remote {
-	SOURCEFORGE_CHECK=`echo "$REMOTE_URL" | grep "sourceforge.net"`
-	if [ $? -eq 0 ]; then
+	if `echo "$REMOTE_URL" | grep -q "sourceforge.net"` ; then
 		pull_sourceforge
 	else
-		pull_iso
+		pull_ftp
 	fi
 
-	echo "Latest ISO: $LATEST_ISO"
 	if [ -n $LATEST_ISO ] ; then
+		echo "# Latest Remote ISO: $LATEST_ISO"
+
 		check_local
 
-		#if [ -z $CURRENT_ISO_NAME ]; then
-		#	echo "# Local Filename was not matched"
-		#else
-		#	echo "# Remote & Local Filenames different"
-		#fi
-
 		if [ "$LATEST_ISO" == "$CURRENT_ISO_NAME" ] ; then
-			echo "# Remote & Local ISO filenames match, exiting"
+			echo "# Remote & Local ISO filenames match, aborting"
 			# TODO : Break?
 		else
+			echo "# Preparing to download $LATEST_ISO"
+			echo "# From: $LATEST_REMOTE"
 			download_remote_iso
 		fi
 	fi
@@ -153,6 +158,7 @@ function load_sources {
 	for f in `find $SOURCES_PATH -type f -name "*.txt" -printf "%f\n"`
 	do
 		read_source $SOURCES_PATH$f
+		unset REMOTE_URL REMOTE_REGEX LOCAL_REGEX GRUB_CFG CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
