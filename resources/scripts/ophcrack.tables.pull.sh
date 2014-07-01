@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tabledir=../tables/
+tabledir=../../tables/
 mkdir -p $tabledir
 
 function download_table() {

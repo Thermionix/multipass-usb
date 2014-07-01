@@ -1,0 +1,4 @@
+# http://mirrors.antergos.com/iso/release/
+REMOTE_URL="ftp://ftp.cc.uoc.gr/mirrors/linux/antergos/iso/release/"
+REMOTE_REGEX="antergos-([0-9.]+)-x86_64.iso"
+GRUB_CFG="antergos.iso.grub.cfg"

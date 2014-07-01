@@ -3,7 +3,7 @@ multipass-usb
 
 GRUB2 + USB pendrive + ISOs
 
-use /scripts/create.grub.key.sh to setup the pendrive
+use /resources/scripts/create.grub.key.sh to setup the pendrive
 
 bootable media are stored under /bootisos/
 
@@ -15,6 +15,6 @@ bootable media are stored under /bootisos/
 
 .cfg in /bootisos/ are also appended as bootable entries
 
-use /scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
+use /resources/scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
 
 test using qemu ``sudo umount /dev/disk/by-label/multipass01 ; sudo qemu-system-x86_64 -drive file=`readlink -f /dev/disk/by-label/multipass01 | sed 's/[0-9]*//g'`,cache=none,if=virtio ``

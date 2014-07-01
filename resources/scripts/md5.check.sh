@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pushd ../bootisos/
+pushd ../../bootisos/
 
 for f in `find . -type f \( -name "*.iso" -o -name "*.bin" -o -name "*.img" \) -printf "%f\n"`
 do

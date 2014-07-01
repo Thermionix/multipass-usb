@@ -1,0 +1,4 @@
+# http://www.blackarch.org/blackarch/iso/
+REMOTE_URL="ftp://ftp.kddilabs.jp/Linux/packages/blackarch/iso/"
+REMOTE_REGEX="blackarchlinux-live-([0-9.]+)-x86_64.iso"
+GRUB_CFG="blackarchlinux-live.iso.grub.cfg"

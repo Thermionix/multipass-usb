@@ -1,6 +1,6 @@
 #!/bin/bash
-ISO_PATH=../bootisos/
-SOURCES_PATH=./sources/
+ISO_PATH=../../bootisos/
+SOURCES_PATH=../iso_sources/
 
 function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }

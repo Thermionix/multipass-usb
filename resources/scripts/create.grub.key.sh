@@ -27,6 +27,7 @@ sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
 
 sleep 1
 
+# TODO : investigate exfat udf f2fs
 sudo mkfs.ext4 -L "${drivelabel}" ${DSK}1
 
 sudo mkdir -p $tmpdir
@@ -48,7 +49,7 @@ if ( grep -q ${DSK} /etc/mtab ); then
 		curl -L https://github.com/Thermionix/multipass-usb/tarball/master | tar zx --strip 1
 	popd
 
-	echo "configfile /scripts/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
+	echo "configfile /resources/grub_sources/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
 
 	echo "## will unmount $partboot when ready"
 	read -n 1 -p "Press any key to continue..."
