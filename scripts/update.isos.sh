@@ -11,7 +11,6 @@ function check_utilities {
 
 function pull_sourceforge {
 	PROJECTNAME=`echo $REMOTE_URL | grep -oPh 'projects/(.*?)/' |cut -f2 -d/`
-	echo "# Projectname $PROJECTNAME"
 
 	PROJECTJSON="http://sourceforge.net/api/project/name/$PROJECTNAME/json"
 	PROJECTID=`curl -s $PROJECTJSON|
@@ -20,7 +19,7 @@ function pull_sourceforge {
 	echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
 
 	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/500/rss"
-	echo "# RSS: $PROJECTRSS"
+	echo "# Reading RSS: $PROJECTRSS"
 
 	LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oP "$REMOTE_REGEX"`
 	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
@@ -38,7 +37,7 @@ function pull_ftp {
 }
 
 function pull_md5 {
-	## Insert magic here to get MD5sum from sourceforge
+	# TODO : magic here to get MD5sum from sourceforge
 	# /(\/project\/showfiles.php\?group_id=\d+)/
 	#LATEST_MD5=""
 
@@ -123,8 +122,8 @@ function update_source_grub {
 	if [ ! -z "$GRUB_CFG" ] ; then
 		if [ -z "$CURRENT_ISO_NAME" ]; then
 			echo "# attempting to replace filename using regex in grub.cfg"
-			# generate patch?
-			#sed -i -e "s|$LOCAL_REGEX|$LATEST_ISO|" $GRUB_CFG
+			sed -i -e "s|$LOCAL_REGEX|$LATEST_ISO|" $GRUB_CFG
+			echo "# please double-check $GRUB_CFG"
 		else
 			echo "# updating grub.cfg"
 			sed -i -e "s/$CURRENT_ISO_NAME/$LATEST_ISO/" $GRUB_CFG
@@ -139,6 +138,7 @@ function check_remote {
 	else
 		pull_ftp
 	fi
+	# TODO : handle direct file link (no directory listing | ftp) with wget
 
 	if [ -z $LATEST_ISO ] ; then
 		echo "# Could not locate remote ISO information"
@@ -183,6 +183,7 @@ function read_source {
 function load_sources {
 	for f in `find $SOURCES_PATH -type f -name "*.txt" -printf "%f\n"`
 	do
+		# TODO : localize variables to each iteration?
 		read_source $SOURCES_PATH$f
 		unset REMOTE_URL REMOTE_REGEX REMOTE_MD5 LOCAL_REGEX GRUB_CFG CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
