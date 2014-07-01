@@ -104,7 +104,6 @@ function download_remote_iso {
 					fi
 				fi
 			fi
-			echo "REPLACED $CURRENT_ISO_NAME WITH $LATEST_ISO"
 			update_source_grub
 		popd
 	fi
@@ -129,6 +128,7 @@ function update_source_grub {
 		else
 			echo "# updating grub.cfg"
 			sed -i -e "s/$CURRENT_ISO_NAME/$LATEST_ISO/" $GRUB_CFG
+			echo "REPLACED $CURRENT_ISO_NAME WITH $LATEST_ISO"
 		fi
 	fi
 }

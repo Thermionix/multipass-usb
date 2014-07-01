@@ -1,0 +1,3 @@
+REMOTE_URL="ftp://ftp.iinet.net.au/linux/linuxmint/stable/17/"
+REMOTE_REGEX="linuxmint-(\d+)-mate-64bit(.*?).iso"
+REMOTE_MD5="md5sums.txt"
