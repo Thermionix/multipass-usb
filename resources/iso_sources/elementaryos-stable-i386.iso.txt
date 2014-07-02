@@ -1,3 +1,0 @@
-REMOTE_URL="http://sourceforge.net/projects/elementaryos/"
-REMOTE_REGEX="/stable/\K(elementaryos-stable-i386.(\d+).iso)"
-LOCAL_REGEX="elementaryos-stable-i386.(\d+).iso"

@@ -1,3 +1,0 @@
-REMOTE_URL="http://sourceforge.net/projects/systemrescuecd/"
-REMOTE_REGEX="systemrescuecd-x86(.*?).iso"
-GRUB_CFG="systemrescuecd.iso.grub.cfg"

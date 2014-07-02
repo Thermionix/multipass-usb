@@ -1,5 +1,0 @@
-FEDORA_VERSION=$(curl -s --disable-epsv --max-time 30 --list-only ftp://mirror.internode.on.net/pub/fedora/linux/releases/ | sort -n | tail -n 1)
-REMOTE_URL="ftp://mirror.internode.on.net/pub/fedora/linux/releases/$FEDORA_VERSION/Fedora/x86_64/iso/"
-REMOTE_REGEX="Fedora-([0-9.]+)-x86_64-netinst.iso"
-#TODO: REMOTE_SHA256="Fedora-$FEDORA_VERSION-x86_64-CHECKSUM"
-GRUB_CFG="fedora-netinst.iso.grub.cfg"

@@ -1,4 +1,0 @@
-REMOTE_URL="ftp://mirror.switch.ch/mirror/pentoo/Pentoo_amd64_default/"
-REMOTE_REGEX="pentoo-amd64(.*?).iso"
-REMOTE_MD5=".DIGESTS"
-GRUB_CFG="pentoo.iso.grub.cfg"

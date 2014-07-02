@@ -1,6 +1,3 @@
 boot
 tables
-bootisos/*.bin
-bootisos/*.img
-bootisos/*.iso
-bootisos/*.md5
+bootisos
