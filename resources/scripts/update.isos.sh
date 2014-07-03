@@ -84,10 +84,17 @@ function download_remote_iso {
 
 		pushd $ISO_PATH_REL
 			if [ ! -z $CURRENT_ISO_NAME ]; then
-				# TODO : confirm remove old files
-				rm $CURRENT_ISO_NAME
-				# TODO : check if md5 file exists
-				rm $CURRENT_ISO_NAME.md5
+				if confirm "remove $CURRENT_ISO_NAME? [y/N]" ; then
+					rm $CURRENT_ISO_NAME
+
+					if [ -f $CURRENT_ISO_NAME.md5 ] ; then
+						rm $CURRENT_ISO_NAME.md5
+					fi
+
+					if [ -f $CURRENT_ISO_NAME.grub.cfg ] ; then
+						rm $CURRENT_ISO_NAME.grub.cfg
+					fi
+				fi
 			fi
 
 			wget $LATEST_REMOTE
@@ -133,10 +140,11 @@ function check_local {
 }
 
 function generate_grub_cfg {
-	if [ -n "$GRUB_FILE" -a -n "$GRUB_CONTENTS" ] ; then
-		if [ -f $ISO_PATH_REL/$LATEST_ISO ] ; then
+	if [ -n "$GRUB_CONTENTS" ] ; then
+		GRUB_FILE=$LATEST_ISO.grub.cfg
+		if [ -f $LATEST_ISO ] ; then
 			echo "# generating $GRUB_FILE"
-			echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|"  > $ISO_PATH_REL/$GRUB_FILE
+			echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|"  > $GRUB_FILE
 		else
 			echo "# not generating $GRUB_FILE, $LATEST_ISO doesn't exist"
 		fi
@@ -172,7 +180,9 @@ function check_remote {
 function force_regenerate_grub_cfg {
 	check_local
 	LATEST_ISO=$CURRENT_ISO_NAME
+	pushd $ISO_PATH_REL
 	generate_grub_cfg
+	popd
 }
 
 function read_source {
