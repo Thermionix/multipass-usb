@@ -1,6 +1,6 @@
 #!/bin/bash
-ISO_PATH=bootisos/
-RELATIVE_ISO_PATH=../../$ISO_PATH
+ISO_PATH_GRUB=/bootisos/
+ISO_PATH_REL=../..$ISO_PATH_GRUB
 SOURCES_PATH=../iso_sources/
 
 function check_utilities {
@@ -11,7 +11,7 @@ function check_utilities {
 }
 
 function check_isopath {
-	mkdir -p $RELATIVE_ISO_PATH
+	mkdir -p $ISO_PATH_REL
 }
 
 function pull_sourceforge {
@@ -81,7 +81,7 @@ function download_remote_iso {
 	if confirm "download $LATEST_ISO? [y/N]" ; then
 		pull_md5
 
-		pushd $RELATIVE_ISO_PATH
+		pushd $ISO_PATH_REL
 			if [ ! -z $CURRENT_ISO_NAME ]; then
 				# TODO : confirm remove old files
 				rm $CURRENT_ISO_NAME
@@ -122,8 +122,8 @@ function download_remote_iso {
 }
 
 function check_local {
-	echo "# Checking $RELATIVE_ISO_PATH using $FILE_REGEX"
-	CURRENT_ISO_NAME=`ls -t $RELATIVE_ISO_PATH | grep -m 1 -oiP "$FILE_REGEX"`
+	echo "# Checking $ISO_PATH_REL using $FILE_REGEX"
+	CURRENT_ISO_NAME=`ls -t $ISO_PATH_REL | grep -m 1 -oiP "$FILE_REGEX"`
 	if [ -z "$CURRENT_ISO_NAME" ]; then
 		echo "# Could not match local ISO!"
 	else
@@ -135,7 +135,7 @@ function generate_grub_cfg {
 	if [ ! -z "$GRUB_FILE" && ! -z "$GRUB_CONTENTS" ] ; then
 		echo "# generating $GRUB_FILE"
 
-		echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH$LATEST_ISO|"  > $GRUB_FILE
+		echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|"  > $GRUB_FILE
 
 		echo "# please double-check $GRUB_FILE"
 	fi

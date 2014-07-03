@@ -2,7 +2,8 @@
 
 # TODO : test qemu installed
 
-#sudo umount /dev/disk/by-label/multipass01 
+# sync writes any data buffered in memory out to disk. 
+sync
 
 usbdev=`readlink -f /dev/disk/by-label/multipass01 | sed 's/[0-9]*//g'`
 
