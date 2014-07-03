@@ -3,15 +3,25 @@ multipass-usb
 
 GRUB2 + USB pendrive + ISOs
 
-use /resources/scripts/create.grub.key.sh to setup the pendrive
+*/resources/scripts/create.grub.key.sh* will:
+* wipe specified disk
+* install grub2
+* copy in memdisk
+* extract a copy of this repository
+* set grub to load /resources/grub_sources/grub.head.cfg
 
-bootable media are stored under /bootisos/
+*/bootisos/* directory stores the bootable media 
+* .cfg are appended as bootable grub entries
+* .bin are automatically added entries
+* .img are automatically added entries (using memdisk)
 
-.cfg in /bootisos/ are appended as bootable entries
+*/resources/scripts/update.isos.sh* will:
+* scan for *.conf in /resources/iso_sources/
+* if local file exists compare filenames
+* offer to download latest iso
+* check md5sum if available
+* generate a grub.cfg for the iso
 
-.bin files will be automatically added to the boot menu
-
-.img files will be automatically bootable via memdisk
-
-use /resources/scripts/ophcrack.tables.pull.sh to populate /tables/ for ophcrack livecd
-
+*/resources/scripts/ophcrack.tables.pull.sh* will
+* populate /tables/ for ophcrack livecd
+* tables_xp_free_small & tables_vista_free
