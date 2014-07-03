@@ -43,7 +43,7 @@ function pull_ftp {
 function pull_http {
 	LATEST_ISO=$(basename $REMOTE_URL)
 	# TODO : possible to check not 404?
-	# TODO : check LATEST_ISO with $FILE_REGEX
+	# TODO : check LATEST_ISO with $FILE_REGEX ? except if REMOTE_COMPRESSED
 	LATEST_REMOTE=$REMOTE_URL
 }
 
@@ -78,36 +78,65 @@ function confirm {
     esac
 }
 
+function extract_compressed {
+	if [ -f $LATEST_ISO ] ; then
+		case $LATEST_ISO in
+		*.tar.bz2)   tar xvjf $LATEST_ISO ;;
+		*.tar.gz)    tar xvzf $LATEST_ISO ;;
+		*.bz2)       bunzip2 $LATEST_ISO ;;
+		*.rar)       unrar x $LATEST_ISO ;;
+		*.gz)        gunzip $LATEST_ISO ;;
+		*.tar)       tar xvf $LATEST_ISO ;;
+		*.tbz2)      tar xvjf $LATEST_ISO ;;
+		*.tgz)       tar xvzf $LATEST_ISO ;;
+		*.zip)       unzip $LATEST_ISO ;;
+		*.Z)         uncompress $LATEST_ISO ;;
+		*.7z)        7z x $LATEST_ISO ;;
+		*)           return ;;
+		esac
+		echo "# Extracted $LATEST_ISO"
+		check_local
+		if [ -f $CURRENT_ISO_NAME ] ; then
+			if confirm "remove $LATEST_ISO? [y/N]" ; then
+				rm $LATEST_ISO
+			fi
+			LATEST_ISO=$CURRENT_ISO_NAME
+		fi
+     fi
+}
+
 function download_remote_iso {
 	if confirm "download $LATEST_ISO? [y/N]" ; then
 		pull_md5
 
-		pushd $ISO_PATH_REL
-			if [ ! -z $CURRENT_ISO_NAME ]; then
-				if confirm "remove $CURRENT_ISO_NAME? [y/N]" ; then
-					rm $CURRENT_ISO_NAME
+		if [ ! -z $CURRENT_ISO_NAME ]; then
+			if confirm "remove $CURRENT_ISO_NAME? [y/N]" ; then
+				rm $CURRENT_ISO_NAME
 
-					if [ -f $CURRENT_ISO_NAME.md5 ] ; then
-						rm $CURRENT_ISO_NAME.md5
-					fi
+				if [ -f $CURRENT_ISO_NAME.md5 ] ; then
+					rm $CURRENT_ISO_NAME.md5
+				fi
 
-					if [ -f $CURRENT_ISO_NAME.grub.cfg ] ; then
-						rm $CURRENT_ISO_NAME.grub.cfg
-					fi
+				if [ -f $CURRENT_ISO_NAME.grub.cfg ] ; then
+					rm $CURRENT_ISO_NAME.grub.cfg
 				fi
 			fi
+		fi
 
-			wget $LATEST_REMOTE
+		wget $LATEST_REMOTE
 
-			if [ $? -ne 0 ] ; then
-				echo "# Download error, exiting"
-				exit
-			fi
+		if [ $? -ne 0 ] ; then
+			echo "# Download error, exiting"
+			exit
+		fi
 
-			if [ -f $LATEST_ISO ] ; then
-				echo "# generating $LATEST_ISO.md5"
-				md5sum $LATEST_ISO > $LATEST_ISO.md5
-			fi
+		if $REMOTE_COMPRESSED ; then
+			extract_compressed
+		fi
+
+		if [ -f $LATEST_ISO ] ; then
+			echo "# generating $LATEST_ISO.md5"
+			md5sum $LATEST_ISO > $LATEST_ISO.md5
 
 			if [ -f $LATEST_ISO.md5 ] ; then
 				if [ -z $LATEST_MD5 ] ; then
@@ -121,17 +150,19 @@ function download_remote_iso {
 					fi
 				fi
 			fi
+
 			generate_grub_cfg
+
 			if [ ! -z "$CURRENT_ISO_NAME" ]; then
 				echo "# Updated $CURRENT_ISO_NAME to $LATEST_ISO"
 			fi
-		popd
+		fi
 	fi
 }
 
 function check_local {
 	echo "# Checking $ISO_PATH_REL using $FILE_REGEX"
-	CURRENT_ISO_NAME=`ls -t $ISO_PATH_REL | grep -m 1 -oiP "$FILE_REGEX"`
+	CURRENT_ISO_NAME=`ls -t . | grep -m 1 -oiP "$FILE_REGEX"`
 	if [ -z "$CURRENT_ISO_NAME" ]; then
 		echo "# Could not match local ISO!"
 	else
@@ -170,9 +201,13 @@ function check_remote {
 		if [ "$LATEST_ISO" == "$CURRENT_ISO_NAME" ] ; then
 			echo "# Remote & Local ISO filenames match, skipping"
 		else
-			echo "# Preparing to download $LATEST_ISO"
-			echo "# From: $LATEST_REMOTE"
-			download_remote_iso
+			if [ $REMOTE_COMPRESSED -a ! -z $CURRENT_ISO_NAME ]  ; then
+				echo "# Skipping: compressed remote and local exists"
+			else
+				echo "# Preparing to download $LATEST_ISO"
+				echo "# From: $LATEST_REMOTE"
+				download_remote_iso
+			fi
 		fi
 	fi
 }
@@ -180,15 +215,14 @@ function check_remote {
 function force_regenerate_grub_cfg {
 	check_local
 	LATEST_ISO=$CURRENT_ISO_NAME
-	pushd $ISO_PATH_REL
 	generate_grub_cfg
-	popd
 }
 
 function read_source {
 	source $1
 	echo "#####################################"
 	if [ -z $SKIP ]; then
+		pushd $ISO_PATH_REL > /dev/null
 		if $REGEN_CFG ; then
 			force_regenerate_grub_cfg
 		else
@@ -202,6 +236,7 @@ function read_source {
 				fi
 			fi
 		fi
+		popd > /dev/null
 	else
 		echo "# skipping $1"
 	fi
@@ -213,7 +248,7 @@ function load_sources {
 		# TODO : localize variables to each iteration?
 		read_source $SOURCES_PATH$f
 
-		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_REGEX GRUB_FILE GRUB_CONTENTS SKIP CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
+		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_REGEX REMOTE_COMPRESSED GRUB_FILE GRUB_CONTENTS SKIP CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
