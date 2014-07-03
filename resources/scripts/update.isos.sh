@@ -2,6 +2,7 @@
 ISO_PATH_GRUB=/bootisos/
 ISO_PATH_REL=../..$ISO_PATH_GRUB
 SOURCES_PATH=../iso_sources/
+REGEN_CFG=false
 
 function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
@@ -132,12 +133,13 @@ function check_local {
 }
 
 function generate_grub_cfg {
-	if [ ! -z "$GRUB_FILE" && ! -z "$GRUB_CONTENTS" ] ; then
-		echo "# generating $GRUB_FILE"
-
-		echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|"  > $GRUB_FILE
-
-		echo "# please double-check $GRUB_FILE"
+	if [ -n "$GRUB_FILE" -a -n "$GRUB_CONTENTS" ] ; then
+		if [ -f $ISO_PATH_REL/$LATEST_ISO ] ; then
+			echo "# generating $GRUB_FILE"
+			echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|"  > $ISO_PATH_REL/$GRUB_FILE
+		else
+			echo "# not generating $GRUB_FILE, $LATEST_ISO doesn't exist"
+		fi
 	fi
 }
 
@@ -167,17 +169,27 @@ function check_remote {
 	fi
 }
 
+function force_regenerate_grub_cfg {
+	check_local
+	LATEST_ISO=$CURRENT_ISO_NAME
+	generate_grub_cfg
+}
+
 function read_source {
 	source $1
 	echo "#####################################"
 	if [ -z $SKIP ]; then
-		if [ -n $REMOTE_URL ] ; then
-			echo "# updating iso using values from: $f"
+		if $REGEN_CFG ; then
+			force_regenerate_grub_cfg
+		else
+			if [ -n $REMOTE_URL ] ; then
+				echo "# updating iso using values from: $f"
 
-			if [ -z "$FILE_REGEX" ]; then
-				echo "# FILE_REGEX not defined"
-			else
-				check_remote
+				if [ -z "$FILE_REGEX" ]; then
+					echo "# FILE_REGEX not defined"
+				else
+					check_remote
+				fi
 			fi
 		fi
 	else
