@@ -17,24 +17,23 @@ function check_isopath {
 function pull_sourceforge {
 	if [ -z "$SOURCEFORGE_REGEX" ]; then
 		echo "# SOURCEFORGE_REGEX Not Defined!"
+	else
+		PROJECTNAME=`echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/`
+
+		PROJECTJSON="http://sourceforge.net/api/project/name/$PROJECTNAME/json"
+		PROJECTID=`curl -s $PROJECTJSON|python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
+		echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
+
+		PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/500/rss"
+
+		echo "# scanning : $PROJECTRSS"
+		echo "# with : $SOURCEFORGE_REGEX"
+		LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oiP "$SOURCEFORGE_REGEX"`
+		LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
 	fi
-
-	PROJECTNAME=`echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/`
-
-	PROJECTJSON="http://sourceforge.net/api/project/name/$PROJECTNAME/json"
-	PROJECTID=`curl -s $PROJECTJSON|python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
-	echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
-
-	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/500/rss"
-	echo "# Reading RSS: $PROJECTRSS"
-
-	LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oiP "$SOURCEFORGE_REGEX"`
-	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
 }
 
 function pull_ftp {
-	check_regex
-
 	LATEST_ISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oiP "$FILE_REGEX"`
 
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATEST_ISO"
@@ -169,19 +168,20 @@ function check_remote {
 }
 
 function read_source {
-	# TODO : Yes/No on update via REMOTE_URL ?
-	# TODO : Read in SKIP=True ?
 	source $1
+	echo "#####################################"
+	if [ -z $SKIP ]; then
+		if [ -n $REMOTE_URL ] ; then
+			echo "# updating iso using values from: $f"
 
-	if [ -n $REMOTE_URL ] ; then
-		echo "#####################################"
-		echo "# updating iso using values from: $f"
-
-		if [ -z "$FILE_REGEX" ]; then
-			echo "# FILE_REGEX not defined"
-		else
-			check_remote
+			if [ -z "$FILE_REGEX" ]; then
+				echo "# FILE_REGEX not defined"
+			else
+				check_remote
+			fi
 		fi
+	else
+		echo "# skipping $1"
 	fi
 }
 
@@ -191,7 +191,7 @@ function load_sources {
 		# TODO : localize variables to each iteration?
 		read_source $SOURCES_PATH$f
 
-		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_REGEX GRUB_FILE GRUB_CONTENTS CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
+		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_REGEX GRUB_FILE GRUB_CONTENTS SKIP CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
