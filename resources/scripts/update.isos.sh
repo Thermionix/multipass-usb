@@ -1,5 +1,6 @@
 #!/bin/bash
-ISO_PATH=../../bootisos/
+ISO_PATH=bootisos/
+RELATIVE_ISO_PATH=../../$ISO_PATH
 SOURCES_PATH=../iso_sources/
 
 function check_utilities {
@@ -9,31 +10,41 @@ function check_utilities {
 	# TODO : check python
 }
 
+function check_isopath {
+	mkdir -p $RELATIVE_ISO_PATH
+}
+
 function pull_sourceforge {
-	PROJECTNAME=`echo $REMOTE_URL | grep -oPh 'projects/(.*?)/' |cut -f2 -d/`
+	if [ -z "$SOURCEFORGE_REGEX" ]; then
+		echo "# SOURCEFORGE_REGEX Not Defined!"
+	fi
+
+	PROJECTNAME=`echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/`
 
 	PROJECTJSON="http://sourceforge.net/api/project/name/$PROJECTNAME/json"
-	PROJECTID=`curl -s $PROJECTJSON|
-
-	python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
+	PROJECTID=`curl -s $PROJECTJSON|python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
 	echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
 
 	PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/500/rss"
 	echo "# Reading RSS: $PROJECTRSS"
 
-	LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oP "$REMOTE_REGEX"`
+	LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oiP "$SOURCEFORGE_REGEX"`
 	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
 }
 
 function pull_ftp {
-	if ! `echo $REMOTE_URL | grep -q -P "^ftp://"` ; then
-		echo "# $REMOTE_URL not FTP"
-		exit
-	fi
+	check_regex
 
-	LATEST_ISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oP "$REMOTE_REGEX"`
+	LATEST_ISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oiP "$FILE_REGEX"`
 
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATEST_ISO"
+}
+
+function pull_http {
+	LATEST_ISO=$(basename $REMOTE_URL)
+	# TODO : possible to check not 404?
+	# TODO : check LATEST_ISO with $FILE_REGEX
+	LATEST_REMOTE=$REMOTE_URL
 }
 
 function pull_md5 {
@@ -42,7 +53,7 @@ function pull_md5 {
 	#LATEST_MD5=""
 
 	if [ ! -z $REMOTE_MD5 ] ; then
-		if echo "$REMOTE_MD5" | grep -qP "^." ; then
+		if echo "$REMOTE_MD5" | grep -qiP "^." ; then
 			echo "# Remote MD5 is an extension, prefixing with ISO name"
 			REMOTE_MD5=$LATEST_ISO$REMOTE_MD5
 		fi
@@ -71,7 +82,7 @@ function download_remote_iso {
 	if confirm "download $LATEST_ISO? [y/N]" ; then
 		pull_md5
 
-		pushd $ISO_PATH
+		pushd $RELATIVE_ISO_PATH
 			if [ ! -z $CURRENT_ISO_NAME ]; then
 				# TODO : confirm remove old files
 				rm $CURRENT_ISO_NAME
@@ -103,14 +114,17 @@ function download_remote_iso {
 					fi
 				fi
 			fi
-			update_source_grub
+			generate_grub_cfg
+			if [ ! -z "$CURRENT_ISO_NAME" ]; then
+				echo "# Updated $CURRENT_ISO_NAME to $LATEST_ISO"
+			fi
 		popd
 	fi
 }
 
 function check_local {
-	echo "# Checking $ISO_PATH using $LOCAL_REGEX"
-	CURRENT_ISO_NAME=`ls -t $ISO_PATH | grep -m 1 -oP "$LOCAL_REGEX"`
+	echo "# Checking $RELATIVE_ISO_PATH using $FILE_REGEX"
+	CURRENT_ISO_NAME=`ls -t $RELATIVE_ISO_PATH | grep -m 1 -oiP "$FILE_REGEX"`
 	if [ -z "$CURRENT_ISO_NAME" ]; then
 		echo "# Could not match local ISO!"
 	else
@@ -118,39 +132,34 @@ function check_local {
 	fi
 }
 
-function update_source_grub {
-	if [ ! -z "$GRUB_CFG" ] ; then
-		if [ -z "$CURRENT_ISO_NAME" ]; then
-			echo "# attempting to replace filename using regex in grub.cfg"
-			sed -i -e "s|$LOCAL_REGEX|$LATEST_ISO|" $GRUB_CFG
-			echo "# please double-check $GRUB_CFG"
-		else
-			echo "# updating grub.cfg"
-			sed -i -e "s/$CURRENT_ISO_NAME/$LATEST_ISO/" $GRUB_CFG
-			echo "REPLACED $CURRENT_ISO_NAME WITH $LATEST_ISO"
-		fi
+function generate_grub_cfg {
+	if [ ! -z "$GRUB_FILE" && ! -z "$GRUB_CONTENTS" ] ; then
+		echo "# generating $GRUB_FILE"
+
+		echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH$LATEST_ISO|"  > $GRUB_FILE
+
+		echo "# please double-check $GRUB_FILE"
 	fi
 }
 
 function check_remote {
-	if `echo "$REMOTE_URL" | grep -q "sourceforge.net"` ; then
+	if `echo "$REMOTE_URL" | grep -qi "sourceforge.net"` ; then
 		pull_sourceforge
-	else
+	elif `echo $REMOTE_URL | grep -qiP "^ftp://"` ; then
 		pull_ftp
+	else
+		pull_http
 	fi
-	# TODO : handle direct file link (no directory listing | ftp) with wget
-
+	
 	if [ -z $LATEST_ISO ] ; then
 		echo "# Could not locate remote ISO information"
-		# TODO : Break ?
 	else
 		echo "# Latest Remote ISO: $LATEST_ISO"
 
 		check_local
 
 		if [ "$LATEST_ISO" == "$CURRENT_ISO_NAME" ] ; then
-			echo "# Remote & Local ISO filenames match, aborting"
-			# TODO : Break?
+			echo "# Remote & Local ISO filenames match, skipping"
 		else
 			echo "# Preparing to download $LATEST_ISO"
 			echo "# From: $LATEST_REMOTE"
@@ -161,33 +170,31 @@ function check_remote {
 
 function read_source {
 	# TODO : Yes/No on update via REMOTE_URL ?
-	# TODO : Read in IGNORE=True ?
+	# TODO : Read in SKIP=True ?
 	source $1
+
 	if [ -n $REMOTE_URL ] ; then
 		echo "#####################################"
 		echo "# updating iso using values from: $f"
 
-		if [ -z "$REMOTE_REGEX" ]; then
-			echo "# REMOTE_REGEX not defined"
-			exit 1
+		if [ -z "$FILE_REGEX" ]; then
+			echo "# FILE_REGEX not defined"
+		else
+			check_remote
 		fi
-		if [ -z "$LOCAL_REGEX" ]; then
-			#echo "# Using REMOTE_REGEX as LOCAL_REGEX"
-			LOCAL_REGEX=$REMOTE_REGEX
-		fi
-
-		check_remote
 	fi
 }
 
 function load_sources {
-	for f in `find $SOURCES_PATH -type f -name "*.txt" -printf "%f\n"`
+	for f in `find $SOURCES_PATH -type f -name "*.conf" -printf "%f\n"`
 	do
 		# TODO : localize variables to each iteration?
 		read_source $SOURCES_PATH$f
-		unset REMOTE_URL REMOTE_REGEX REMOTE_MD5 LOCAL_REGEX GRUB_CFG CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
+
+		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_REGEX GRUB_FILE GRUB_CONTENTS CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
 check_utilities
+check_isopath
 load_sources
