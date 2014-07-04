@@ -8,6 +8,7 @@ LOOP_DIR=/tmp/fd_loop/
 
 FREEDOS_IMG=$ISO_PATH_REL"fdboot.img"
 
+# TODO : move these into conf file under ../freedos_sources
 IMG_FILENAME="fd_wdidle3.img"
 IMG_PATH=$ISO_PATH_REL$IMG_FILENAME
 IMG_GROW="+30M"
@@ -17,6 +18,8 @@ APPEND_ARCHIVE="wdidle3_1_05.zip"
 function check_base_img() {
 	echo "# Checking $FREEDOS_IMG exists"
 	
+	# http://ftp.chtaube.eu/pub/FreeDOS/bootable-usb/FreeDOS-1.1-memstick-3-30M.img.bz2
+	# bunzip2
 	if [ ! -f $FREEDOS_IMG ] ; then
 		wget -O $FREEDOS_IMG http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.0/fdboot.img
 	fi
