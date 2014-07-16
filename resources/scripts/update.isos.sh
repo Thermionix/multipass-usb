@@ -8,7 +8,7 @@ function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 	command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
 	command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
-	# TODO : check python
+	command -v xml_grep > /dev/null || { echo "## please install xml_grep" ; exit 1 ; }
 }
 
 function check_isopath {
@@ -16,22 +16,31 @@ function check_isopath {
 }
 
 function pull_sourceforge {
-	if [ -z "$SOURCEFORGE_REGEX" ]; then
-		echo "# SOURCEFORGE_REGEX Not Defined!"
-	else
-		PROJECTNAME=`echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/`
+	PROJECTNAME=`echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/`
 
-		PROJECTJSON="http://sourceforge.net/api/project/name/$PROJECTNAME/json"
-		PROJECTID=`curl -s $PROJECTJSON|python -c "import json; import sys;print((json.load(sys.stdin))['Project']['id'])"`
-		echo "# SourceForge Project: $PROJECTNAME Id: $PROJECTID"
-
-		PROJECTRSS="http://sourceforge.net/api/file/index/project-id/$PROJECTID/mtime/desc/limit/500/rss"
-
-		echo "# scanning : $PROJECTRSS"
-		echo "# with : $SOURCEFORGE_REGEX"
-		LATEST_ISO=`curl --max-time 30 -s $PROJECTRSS | grep "<title>" | grep -m 1 -oiP "$SOURCEFORGE_REGEX"`
-		LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
+	if [ ! -z $SOURCEFORGE_PATH ]; then
+		PROJECTRSSPATH="?path=$SOURCEFORGE_PATH"
 	fi
+
+	PROJECTRSS="https://sourceforge.net/projects/$PROJECTNAME/rss$PROJECTRSSPATH"
+	SOURCEFORGE_REGEX="${FILE_REGEX//$}"
+
+	echo "# scanning : $PROJECTRSS"
+
+	SOURCEFORGE_OUTPUT=(`curl -L --max-time 30 -s $PROJECTRSS \
+		| xml_grep --root "/rss/channel/item/title" \
+		--root "/rss/channel/item/media:content" \
+		--text_only \
+		| grep -m 1 -iP -A 1 "$SOURCEFORGE_REGEX"`)
+
+	LATEST_ISO=${SOURCEFORGE_OUTPUT[0]##*/}
+	LATEST_MD5=${SOURCEFORGE_OUTPUT[1]}
+
+	unset SOURCEFORGE_OUTPUT PROJECTRSSPATH
+
+	echo "# Found $LATEST_ISO md5: $LATEST_MD5"
+
+	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
 }
 
 function pull_ftp {
@@ -48,10 +57,6 @@ function pull_http {
 }
 
 function pull_md5 {
-	# TODO : magic here to get MD5sum from sourceforge
-	# /(\/project\/showfiles.php\?group_id=\d+)/
-	#LATEST_MD5=""
-
 	if [ ! -z $REMOTE_MD5 ] ; then
 		if echo "$REMOTE_MD5" | grep -qiP "^." ; then
 			echo "# Remote MD5 is an extension, prefixing with ISO name"
@@ -146,7 +151,7 @@ function download_remote_iso {
 						echo "# MD5 CHECKSUM COMPARISON FAILED, exiting"
 						echo "# You should delete this ISO and re-download"
 						# TODO : offer redownload?
-						exit
+						return
 					fi
 				fi
 			fi
@@ -175,7 +180,10 @@ function generate_grub_cfg {
 		GRUB_FILE=$LATEST_ISO.grub.cfg
 		if [ -f $LATEST_ISO ] ; then
 			echo "# generating $GRUB_FILE"
-			echo "$GRUB_CONTENTS" | sed -e "s|_iso_name_|$LATEST_ISO|" -e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|"  > $GRUB_FILE
+			echo "$GRUB_CONTENTS" | \
+				sed -e "s|_iso_name_|$LATEST_ISO|" \
+				-e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|" \
+				 > $GRUB_FILE
 		else
 			echo "# not generating $GRUB_FILE, $LATEST_ISO doesn't exist"
 		fi
@@ -201,13 +209,15 @@ function check_remote {
 		if [ "$LATEST_ISO" == "$CURRENT_ISO_NAME" ] ; then
 			echo "# Remote & Local ISO filenames match, skipping"
 		else
-			if [ $REMOTE_COMPRESSED -a ! -z $CURRENT_ISO_NAME ]  ; then
-				echo "# Skipping: compressed remote and local exists"
-			else
-				echo "# Preparing to download $LATEST_ISO"
-				echo "# From: $LATEST_REMOTE"
-				download_remote_iso
+			if [ $REMOTE_COMPRESSED ] ; then
+				if [ ! -z $CURRENT_ISO_NAME ] ; then
+					echo "# Skipping: compressed remote and local exists"
+					return
+				fi
 			fi
+			echo "# Preparing to download $LATEST_ISO"
+			echo "# From: $LATEST_REMOTE"
+			download_remote_iso			
 		fi
 	fi
 }
@@ -248,10 +258,11 @@ function load_sources {
 		# TODO : localize variables to each iteration?
 		read_source $SOURCES_PATH$f
 
-		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_REGEX REMOTE_COMPRESSED GRUB_FILE GRUB_CONTENTS SKIP CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
+		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_PATH REMOTE_COMPRESSED GRUB_FILE GRUB_CONTENTS SKIP CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
 check_utilities
 check_isopath
 load_sources
+echo "# Done"
