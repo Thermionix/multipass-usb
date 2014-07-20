@@ -58,7 +58,7 @@ function pull_http {
 
 function pull_md5 {
 	if [ ! -z $REMOTE_MD5 ] ; then
-		if echo "$REMOTE_MD5" | grep -qiP "^." ; then
+		if echo "$REMOTE_MD5" | grep -qiP "^\." ; then
 			echo "# Remote MD5 is an extension, prefixing with ISO name"
 			REMOTE_MD5=$LATEST_ISO$REMOTE_MD5
 		fi
@@ -152,6 +152,8 @@ function download_remote_iso {
 						echo "# You should delete this ISO and re-download"
 						# TODO : offer redownload?
 						return
+					else
+						echo "# md5 checksum compared and matched!"
 					fi
 				fi
 			fi
