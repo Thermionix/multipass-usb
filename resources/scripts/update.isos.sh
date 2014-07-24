@@ -36,8 +36,6 @@ function pull_sourceforge {
 	LATEST_ISO=${SOURCEFORGE_OUTPUT[0]##*/}
 	LATEST_MD5=${SOURCEFORGE_OUTPUT[1]}
 
-	unset SOURCEFORGE_OUTPUT PROJECTRSSPATH
-
 	echo "# Found $LATEST_ISO md5: $LATEST_MD5"
 
 	LATEST_REMOTE="http://downloads.sourceforge.net/$PROJECTNAME/$LATEST_ISO"
@@ -231,6 +229,7 @@ function force_regenerate_grub_cfg {
 }
 
 function read_source {
+(
 	source $1
 	echo "#####################################"
 	if [ -z $SKIP ]; then
@@ -252,15 +251,13 @@ function read_source {
 	else
 		echo "# skipping $1"
 	fi
+)
 }
 
 function load_sources {
 	for f in `find $SOURCES_PATH -type f -name "*.conf" -printf "%f\n"`
 	do
-		# TODO : localize variables to each iteration?
 		read_source $SOURCES_PATH$f
-
-		unset REMOTE_URL FILE_REGEX REMOTE_MD5 SOURCEFORGE_PATH REMOTE_COMPRESSED GRUB_FILE GRUB_CONTENTS SKIP CURRENT_ISO_NAME LATEST_ISO LATEST_REMOTE LATEST_MD5
 	done
 }
 
