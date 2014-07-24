@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/create.grub.key.sh)"
+# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/resources/scripts/create.grub.key.sh)"
 
 command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
@@ -14,7 +14,9 @@ command -v sgdisk >/dev/null 2>&1 || { echo "sgdisk (pkg gptfdisk) required for 
 disks=`sudo parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
 DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
 
+# TODO : ask user for disk label?
 drivelabel="multipass01"
+
 partboot="/dev/disk/by-label/$drivelabel"
 tmpdir=/tmp/$drivelabel
 

@@ -3,6 +3,7 @@ ISO_PATH_GRUB=/bootisos/
 ISO_PATH_REL=../..$ISO_PATH_GRUB
 SOURCES_PATH=../iso_sources/
 REGEN_CFG=false
+DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs e2label)
 
 function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
@@ -16,7 +17,7 @@ function check_isopath {
 }
 
 function pull_sourceforge {
-	PROJECTNAME=`echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/`
+	PROJECTNAME=$(echo $REMOTE_URL | grep -oiPh 'projects/(.*?)/' |cut -f2 -d/)
 
 	if [ ! -z $SOURCEFORGE_PATH ]; then
 		PROJECTRSSPATH="?path=$SOURCEFORGE_PATH"
@@ -27,11 +28,11 @@ function pull_sourceforge {
 
 	echo "# scanning : $PROJECTRSS"
 
-	SOURCEFORGE_OUTPUT=(`curl -L --max-time 30 -s $PROJECTRSS \
+	SOURCEFORGE_OUTPUT=($(curl -L --max-time 30 -s $PROJECTRSS \
 		| xml_grep --root "/rss/channel/item/title" \
 		--root "/rss/channel/item/media:content" \
 		--text_only \
-		| grep -m 1 -iP -A 1 "$SOURCEFORGE_REGEX"`)
+		| grep -m 1 -iP -A 1 "$SOURCEFORGE_REGEX"))
 
 	LATEST_ISO=${SOURCEFORGE_OUTPUT[0]##*/}
 	LATEST_MD5=${SOURCEFORGE_OUTPUT[1]}
@@ -42,7 +43,7 @@ function pull_sourceforge {
 }
 
 function pull_ftp {
-	LATEST_ISO=`curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oiP "$FILE_REGEX"`
+	LATEST_ISO=$(curl -s --disable-epsv --max-time 30 --list-only "$REMOTE_URL" | grep -m 1 -oiP "$FILE_REGEX")
 
 	LATEST_REMOTE="${REMOTE_URL%/}/$LATEST_ISO"
 }
@@ -63,7 +64,7 @@ function pull_md5 {
 
 		echo "# Attempting to get MD5 checksum from $REMOTE_URL$REMOTE_MD5"
 
-		LATEST_MD5=`curl -s --disable-epsv --max-time 30 "$REMOTE_URL$REMOTE_MD5" | grep -m 1 $LATEST_ISO | cut -d " " -f 1`
+		LATEST_MD5=$(curl -s --disable-epsv --max-time 30 "$REMOTE_URL$REMOTE_MD5" | grep -m 1 $LATEST_ISO | cut -d " " -f 1)
 		echo "# Remote MD5: $LATEST_MD5"
 	fi
 }
@@ -145,7 +146,7 @@ function download_remote_iso {
 				if [ -z $LATEST_MD5 ] ; then
 					echo "# no remote md5sum, unable to verify ISO"
 				else
-					if [ `cat $LATEST_ISO.md5 | cut -d " " -f 1` != $LATEST_MD5 ] ; then
+					if [ $(cat $LATEST_ISO.md5 | cut -d " " -f 1) != $LATEST_MD5 ] ; then
 						echo "# MD5 CHECKSUM COMPARISON FAILED, exiting"
 						echo "# You should delete this ISO and re-download"
 						# TODO : offer redownload?
@@ -167,7 +168,7 @@ function download_remote_iso {
 
 function check_local {
 	echo "# Checking $ISO_PATH_REL using $FILE_REGEX"
-	CURRENT_ISO_NAME=`ls -t . | grep -m 1 -oiP "$FILE_REGEX"`
+	CURRENT_ISO_NAME=$(ls -t . | grep -m 1 -oiP "$FILE_REGEX")
 	if [ -z "$CURRENT_ISO_NAME" ]; then
 		echo "# Could not match local ISO!"
 	else
@@ -183,6 +184,7 @@ function generate_grub_cfg {
 			echo "$GRUB_CONTENTS" | \
 				sed -e "s|_iso_name_|$LATEST_ISO|" \
 				-e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|" \
+				-e "s|_drive_label_|$DRIVE_LABEL|" \
 				 > $GRUB_FILE
 		else
 			echo "# not generating $GRUB_FILE, $LATEST_ISO doesn't exist"
@@ -191,9 +193,9 @@ function generate_grub_cfg {
 }
 
 function check_remote {
-	if `echo "$REMOTE_URL" | grep -qi "sourceforge.net"` ; then
+	if $(echo "$REMOTE_URL" | grep -qi "sourceforge.net") ; then
 		pull_sourceforge
-	elif `echo $REMOTE_URL | grep -qiP "^ftp://"` ; then
+	elif $(echo $REMOTE_URL | grep -qiP "^ftp://") ; then
 		pull_ftp
 	else
 		pull_http
@@ -255,7 +257,7 @@ function read_source {
 }
 
 function load_sources {
-	for f in `find $SOURCES_PATH -type f -name "*.conf" -printf "%f\n"`
+	for f in $(find $SOURCES_PATH -type f -name "*.conf" -printf "%f\n")
 	do
 		read_source $SOURCES_PATH$f
 	done
