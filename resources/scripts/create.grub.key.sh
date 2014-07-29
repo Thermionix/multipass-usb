@@ -21,6 +21,8 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	sleep 1
 
 	sudo sgdisk --zap-all ${DSK}
+	sudo dd if=/dev/zero of=${DSK} bs=1M count=1
+	sleep 1
 
 	# TODO : exfat f2fs fat32
 	case $(whiptail --menu "Choose a filesystem" 17 30 10 \
@@ -29,8 +31,13 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		3>&1 1>&2 2>&3) in
 			1)
 				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs required" >&2 ; exit 1 ; }
-				sudo dd if=/dev/zero of=${DSK} bs=1M count=1
-				sudo mkudffs -b 512 --vid=$drivelabel --media-type=hd ${DSK}
+
+				sudo parted -s ${DSK} mklabel msdos
+				sudo parted -s ${DSK} -a optimal unit MB mkpart primary 1 2
+				sudo parted -s ${DSK} set 1 bios_grub on
+				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 2 -1
+
+				sudo mkudffs -b 512 --vid=$drivelabel --media-type=hd ${DSK}2
 				sleep 1
 				# TODO : maybe check udf module loaded?
 			;;
@@ -53,10 +60,8 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		echo "info: $partboot mounted at $tmpdir"
 
 		sudo grub-install --no-floppy --root-directory=$tmpdir ${DSK}
-
 		sleep 1
 
-		# TODO : only chown on a filesystem that has permissions
 		sudo chown -R `whoami` $tmpdir
 
 		cp /usr/lib/syslinux/bios/memdisk $tmpdir/boot/grub/
@@ -64,9 +69,8 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		pushd $tmpdir
 			# TODO : offer git checkout or tar extract
 			curl -L https://github.com/Thermionix/multipass-usb/tarball/master | tar zx --strip 1
+			echo "configfile /resources/grub_sources/grub.head.cfg" > ./boot/grub/grub.cfg
 		popd
-
-		echo "configfile /resources/grub_sources/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
 
 		echo "## will unmount $partboot when ready"
 		read -n 1 -p "Press any key to continue..."
