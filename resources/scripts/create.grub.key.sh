@@ -17,12 +17,18 @@ DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks
 drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "multipass01" 3>&1 1>&2 2>&3)
 
 if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
+	echo "# unmounting ${DSK}"
 	sudo umount ${DSK}* || /bin/true
 	sleep 1
 
+	echo "# wiping ${DSK}"
 	sudo dd if=/dev/zero of=${DSK} bs=512 count=1
 	sudo sgdisk --zap-all --clear -g ${DSK}
 	sleep 1
+
+	echo "# partitioning ${DSK}"
+	sudo parted -s ${DSK} mklabel msdos
+	sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
 
 	case $(whiptail --menu "Choose a filesystem" 17 30 10 \
 		"1" "udf" \
@@ -32,32 +38,17 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		3>&1 1>&2 2>&3) in
 			1)
 				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs required" >&2 ; exit 1 ; }
-
-				sudo parted -s ${DSK} mklabel msdos
-				sudo parted -s ${DSK} -a optimal unit MB mkpart primary 1 2
-				sudo parted -s ${DSK} set 1 boot on
-				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 2 -1
-
-				sudo mkudffs -b 512 --vid=$drivelabel --media-type=hd ${DSK}2
-				sleep 1
 				# TODO : check udf module loaded
+
+				sudo mkudffs -b 512 --vid=$drivelabel --media-type=hd ${DSK}1
 			;;
 			2)
-				sudo parted -s ${DSK} mklabel msdos
-				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
-				sleep 1
 				sudo mkfs.ext4 -L "${drivelabel}" ${DSK}1
 			;;
 			3)
-				sudo parted -s ${DSK} mklabel msdos
-				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
-				sleep 1
 				sudo mkfs.vfat -n "${drivelabel}" ${DSK}1
 			;;
 			4)
-				sudo parted -s ${DSK} mklabel msdos
-				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
-				sleep 1
 				sudo mkfs.exfat -n "${drivelabel}" ${DSK}1
 			;;
 	esac
