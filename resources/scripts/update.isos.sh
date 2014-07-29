@@ -2,14 +2,25 @@
 ISO_PATH_GRUB=/bootisos/
 ISO_PATH_REL=../..$ISO_PATH_GRUB
 SOURCES_PATH=../iso_sources/
-REGEN_CFG=false
-DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs e2label)
+
+function detect_drive_label {
+	DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs blkid -s LABEL -o value)
+	[ ! -z $DRIVE_LABEL ] || { echo "## unable to detect drive label" ; exit 1 ; }
+}
+
+function check_regen_cfg {
+	REGEN_CFG=false
+	if whiptail --defaultno --yesno "only regenerate .cfg files in $ISO_PATH_REL?\n(will not download anything)" 15 60 ; then
+		REGEN_CFG=true
+	fi
+}
 
 function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 	command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
 	command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
 	command -v xml_grep > /dev/null || { echo "## please install xml_grep" ; exit 1 ; }
+	command -v whiptail > /dev/null || { echo "whiptail (pkg libnewt) required for this script" ; exit 1 ; }
 }
 
 function check_isopath {
@@ -226,8 +237,10 @@ function check_remote {
 
 function force_regenerate_grub_cfg {
 	check_local
-	LATEST_ISO=$CURRENT_ISO_NAME
-	generate_grub_cfg
+	if [ ! -z $CURRENT_ISO_NAME ] ; then
+		LATEST_ISO=$CURRENT_ISO_NAME
+		generate_grub_cfg
+	fi
 }
 
 function read_source {
@@ -264,6 +277,8 @@ function load_sources {
 }
 
 check_utilities
+check_regen_cfg
+detect_drive_label
 check_isopath
 load_sources
 echo "# Done"
