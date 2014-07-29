@@ -14,46 +14,60 @@ command -v sgdisk >/dev/null 2>&1 || { echo "sgdisk (pkg gptfdisk) required for 
 disks=`sudo parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
 DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
 
-# TODO : ask user for disk label?
-drivelabel="multipass01"
+drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "multipass01" 3>&1 1>&2 2>&3)
 
-partboot="/dev/disk/by-label/$drivelabel"
-tmpdir=/tmp/$drivelabel
+if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 
-echo "## WILL COMPLETELY WIPE ${DSK}"
-read -p "Press [Enter] key to continue"
-sudo sgdisk --zap-all ${DSK}
+	sudo sgdisk --zap-all ${DSK}
 
-sudo parted -s ${DSK} mklabel msdos
-sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
+	# TODO : exfat f2fs fat32
+	case $(whiptail --menu "Choose a filesystem" 17 30 10 \
+		"1" "udf" \
+		"2" "ext4" \
+		3>&1 1>&2 2>&3) in
+			1)
+				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs required" >&2 ; exit 1 ; }
+				sudo dd if=/dev/zero of=${DSK} bs=1M count=1
+				sudo mkudffs -b 512 --vid=$drivelabel --media-type=hd ${DSK}
+				sleep 1
+				# TODO : maybe check udf module loaded?
+			;;
+			2)
+				sudo parted -s ${DSK} mklabel msdos
+				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
+				sleep 1
+				sudo mkfs.ext4 -L "${drivelabel}" ${DSK}1
+			;;
+	esac
 
-sleep 1
+	partboot="/dev/disk/by-label/$drivelabel"
 
-# TODO : investigate exfat udf f2fs
-sudo mkfs.ext4 -L "${drivelabel}" ${DSK}1
+	tmpdir=/tmp/$drivelabel
+	sudo mkdir -p $tmpdir
 
-sudo mkdir -p $tmpdir
+	sudo mount $partboot $tmpdir
 
-sudo mount $partboot $tmpdir
+	if ( grep -q ${DSK} /etc/mtab ); then
+		echo "info: $partboot mounted at $tmpdir"
 
-if ( grep -q ${DSK} /etc/mtab ); then
-	echo "info: $partboot mounted at $tmpdir"
+		sudo grub-install --no-floppy --root-directory=$tmpdir ${DSK}
 
-	sudo grub-install --no-floppy --root-directory=$tmpdir ${DSK}
+		sleep 1
 
-	sleep 1
+		# TODO : only chown on a filesystem that has permissions
+		sudo chown -R `whoami` $tmpdir
 
-	sudo chown -R `whoami` $tmpdir
+		cp /usr/lib/syslinux/bios/memdisk $tmpdir/boot/grub/
 
-	cp /usr/lib/syslinux/bios/memdisk $tmpdir/boot/grub/
+		pushd $tmpdir
+			# TODO : offer git checkout or tar extract
+			curl -L https://github.com/Thermionix/multipass-usb/tarball/master | tar zx --strip 1
+		popd
 
-	pushd $tmpdir
-		curl -L https://github.com/Thermionix/multipass-usb/tarball/master | tar zx --strip 1
-	popd
+		echo "configfile /resources/grub_sources/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
 
-	echo "configfile /resources/grub_sources/grub.head.cfg" > $tmpdir/boot/grub/grub.cfg
-
-	echo "## will unmount $partboot when ready"
-	read -n 1 -p "Press any key to continue..."
-	sudo umount $tmpdir
+		echo "## will unmount $partboot when ready"
+		read -n 1 -p "Press any key to continue..."
+		sudo umount $tmpdir
+	fi
 fi
