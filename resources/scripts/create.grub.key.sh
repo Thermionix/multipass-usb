@@ -20,8 +20,8 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	sudo umount ${DSK}* || /bin/true
 	sleep 1
 
-	sudo sgdisk --zap-all ${DSK}
-	sudo dd if=/dev/zero of=${DSK} bs=1M count=1
+	sudo dd if=/dev/zero of=${DSK} bs=512 count=1
+	sudo sgdisk --zap-all --clear -g ${DSK}
 	sleep 1
 
 	case $(whiptail --menu "Choose a filesystem" 17 30 10 \
