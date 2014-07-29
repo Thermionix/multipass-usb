@@ -24,28 +24,41 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	sudo dd if=/dev/zero of=${DSK} bs=1M count=1
 	sleep 1
 
-	# TODO : exfat f2fs fat32
 	case $(whiptail --menu "Choose a filesystem" 17 30 10 \
 		"1" "udf" \
 		"2" "ext4" \
+		"3" "vfat" \
+		"4" "exfat" \
 		3>&1 1>&2 2>&3) in
 			1)
 				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs required" >&2 ; exit 1 ; }
 
 				sudo parted -s ${DSK} mklabel msdos
 				sudo parted -s ${DSK} -a optimal unit MB mkpart primary 1 2
-				sudo parted -s ${DSK} set 1 bios_grub on
+				sudo parted -s ${DSK} set 1 boot on
 				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 2 -1
 
 				sudo mkudffs -b 512 --vid=$drivelabel --media-type=hd ${DSK}2
 				sleep 1
-				# TODO : maybe check udf module loaded?
+				# TODO : check udf module loaded
 			;;
 			2)
 				sudo parted -s ${DSK} mklabel msdos
 				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
 				sleep 1
 				sudo mkfs.ext4 -L "${drivelabel}" ${DSK}1
+			;;
+			3)
+				sudo parted -s ${DSK} mklabel msdos
+				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
+				sleep 1
+				sudo mkfs.vfat -n "${drivelabel}" ${DSK}1
+			;;
+			4)
+				sudo parted -s ${DSK} mklabel msdos
+				sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
+				sleep 1
+				sudo mkfs.exfat -n "${drivelabel}" ${DSK}1
 			;;
 	esac
 
@@ -59,7 +72,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	if ( grep -q ${DSK} /etc/mtab ); then
 		echo "info: $partboot mounted at $tmpdir"
 
-		sudo grub-install --no-floppy --root-directory=$tmpdir ${DSK}
+		sudo grub-install --skip-fs-probe --no-floppy --root-directory=$tmpdir ${DSK}
 		sleep 1
 
 		sudo chown -R `whoami` $tmpdir
