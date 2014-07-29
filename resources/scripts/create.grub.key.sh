@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+# call to execute script in a shell from web;
 # bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/resources/scripts/create.grub.key.sh)"
 
 command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
@@ -18,12 +19,14 @@ DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks
 drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "multipass01" 3>&1 1>&2 2>&3)
 
 if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
-	echo "# unmounting ${DSK}"
-	sudo umount ${DSK}* || /bin/true
-	sleep 1
+	if ( grep -q ${DSK} /etc/mtab ); then
+		echo "# unmounting ${DSK}"
+		sudo umount ${DSK}* || /bin/true
+		sleep 1
+	fi
 
 	echo "# wiping ${DSK}"
-	sudo dd if=/dev/zero of=${DSK} bs=512 count=20
+	sudo dd if=/dev/zero of=${DSK} bs=512 count=4000
 	sudo sgdisk --zap-all --clear -g ${DSK}
 	sleep 1
 
@@ -63,11 +66,13 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	sudo mkdir -p $tmpdir
 
 	sudo mount $partboot $tmpdir
-	trap $(sudo umount $tmpdir) EXIT
 
 	if ( grep -q ${DSK} /etc/mtab ); then
-		echo "info: $partboot mounted at $tmpdir"
+		echo "# mounted $partboot at $tmpdir"
 
+		trap 'echo unmounting $partboot ; sudo umount $tmpdir' EXIT
+
+		echo "# installing grub on ${DSK}"
 		sudo grub-install --skip-fs-probe --no-floppy --root-directory=$tmpdir ${DSK}
 		sleep 1
 
@@ -78,7 +83,10 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 			echo "configfile /resources/grub_sources/grub.head.cfg" > ./boot/grub/grub.cfg
 			mkdir -p ./bootisos/
 
-			if whiptail --defaultno --yesno "git checkout repo (able to pull updates), or just extract repository" 8 40 ; then
+			repo="https://github.com/Thermionix/multipass-usb.git"
+			extracttxt="repo:$repo\nclone git repo (yes)\ntarball extract a copy of master (no)\ncloning will allow you to git pull updates"
+
+			if whiptail --defaultno --yesno "$extracttxt" 15 60 ; then
 				git init
 				git remote add origin https://github.com/Thermionix/multipass-usb.git
 				git fetch
@@ -87,9 +95,5 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 				curl -L https://github.com/Thermionix/multipass-usb/tarball/master | tar zx --strip 1
 			fi
 		popd
-
-		echo "## will unmount $partboot when ready"
-		read -n 1 -p "Press any key to continue..."
-		sudo umount $tmpdir
 	fi
 fi
