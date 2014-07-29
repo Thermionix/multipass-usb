@@ -17,6 +17,8 @@ DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks
 drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "multipass01" 3>&1 1>&2 2>&3)
 
 if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
+	sudo umount ${DSK}* || /bin/true
+	sleep 1
 
 	sudo sgdisk --zap-all ${DSK}
 
