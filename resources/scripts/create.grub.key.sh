@@ -7,7 +7,7 @@ set -e
 command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
 command -v grub-install > /dev/null || { echo "## please install grub" ; exit 1 ; }
-command -v tar > /dev/null || { echo "## please install tar" ; exit 1 ; }
+command -v bsdtar > /dev/null || { echo "## please install bsdtar" ; exit 1 ; }
 command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 command -v git > /dev/null || { echo "## please install git" ; exit 1 ; }
 command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required for this script" >&2 ; exit 1 ; }
@@ -79,21 +79,25 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		sudo chown -R `whoami` $tmpdir
 
 		pushd $tmpdir
-			cp /usr/lib/syslinux/bios/memdisk ./boot/grub/
 			echo "configfile /resources/grub_sources/grub.head.cfg" > ./boot/grub/grub.cfg
 			mkdir -p ./bootisos/
 
 			repo="https://github.com/Thermionix/multipass-usb.git"
-			extracttxt="repo:$repo\nclone git repo (yes)\ntarball extract a copy of master (no)\ncloning will allow you to git pull updates"
+			extracttxt="repo:$repo\n\nclone git repo (yes)\ntarball extract a copy of master (no)\n\ncloning will allow you to git pull updates"
 
-			if whiptail --defaultno --yesno "$extracttxt" 15 60 ; then
+			if whiptail --defaultno --yesno "$extracttxt" 15 70 ; then
 				git init
-				git remote add origin https://github.com/Thermionix/multipass-usb.git
+				git remote add origin git@github.com:Thermionix/multipass-usb.git
 				git fetch
 				git checkout -t origin/master
 			else
-				curl -L https://github.com/Thermionix/multipass-usb/tarball/master | tar zx --strip 1
+				wget -qO- https://github.com/Thermionix/multipass-usb/tarball/master | bsdtar --strip-components 1 -xvf-
 			fi
+
+			cp /usr/lib/syslinux/bios/memdisk ./boot/grub/
+
+			wget -qO- http://git.ipxe.org/releases/wimboot/wimboot-latest.zip | \
+				bsdtar --include wimboot-*/wimboot --strip-components 1 -C ./boot/grub -xvf-
 		popd
 	fi
 fi
