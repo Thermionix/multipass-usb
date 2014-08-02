@@ -73,7 +73,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		trap 'echo unmounting $partboot ; sudo umount $tmpdir' EXIT
 
 		echo "# installing grub on ${DSK}"
-		sudo grub-install --skip-fs-probe --no-floppy --root-directory=$tmpdir ${DSK}
+		sudo grub-install --target=i386-pc --skip-fs-probe --no-floppy --root-directory=$tmpdir ${DSK}
 		sleep 1
 
 		sudo chown -R `whoami` $tmpdir
