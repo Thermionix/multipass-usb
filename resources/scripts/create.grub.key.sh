@@ -41,7 +41,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		"4" "exfat" \
 		3>&1 1>&2 2>&3) in
 			1)
-				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs required" >&2 ; exit 1 ; }
+				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs (udftools) required" >&2 ; exit 1 ; }
 				[ $(lsmod | grep -o ^udf) ] || { echo "udf kernel module not loaded" >&2 ; exit 1 ; }
 
 				sudo mkudffs -b 512 --utf8 --vid=$drivelabel --media-type=hd ${DSK}1
