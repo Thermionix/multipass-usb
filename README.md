@@ -12,8 +12,6 @@ GRUB2 + USB pendrive + ISOs
 
 */bootisos/* directory stores the bootable media 
 * .cfg are appended as bootable grub entries
-* .bin are automatically added entries
-* .img are automatically added entries (using memdisk)
 
 */resources/scripts/update.isos.sh* will:
 * scan for *.conf in /resources/iso_sources/
