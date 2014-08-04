@@ -193,8 +193,8 @@ function generate_grub_cfg {
 		if [ -f $LATEST_ISO ] ; then
 			echo "# generating $GRUB_FILE"
 			echo "$GRUB_CONTENTS" | \
-				sed -e "s|_iso_name_|$LATEST_ISO|" \
-				-e "s|_iso_path_|$ISO_PATH_GRUB$LATEST_ISO|" \
+				sed -e "s#\(_iso_name_\|_file_name_\)#$LATEST_ISO#" \
+				-e "s#\(_iso_path_\|_file_path_\)#$ISO_PATH_GRUB$LATEST_ISO#" \
 				-e "s|_drive_label_|$DRIVE_LABEL|" \
 				 > $GRUB_FILE
 		else
