@@ -16,7 +16,7 @@ command -v sgdisk >/dev/null 2>&1 || { echo "sgdisk (pkg gptfdisk) required for 
 disks=`sudo parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
 DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
 
-drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "multipass01" 3>&1 1>&2 2>&3)
+drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "MULTIPASS01" 3>&1 1>&2 2>&3 | tr '[:lower:]' '[:upper:]')
 
 if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	if ( grep -q ${DSK} /etc/mtab ); then
@@ -82,12 +82,12 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 			echo "configfile /resources/grub_sources/grub.head.cfg" > ./boot/grub/grub.cfg
 			mkdir -p ./bootisos/
 
-			repo="https://github.com/Thermionix/multipass-usb.git"
+			repo="git@github.com:Thermionix/multipass-usb.git"
 			extracttxt="repo:$repo\n\nclone git repo (yes)\ntarball extract a copy of master (no)\n\ncloning will allow you to git pull updates"
 
 			if whiptail --defaultno --yesno "$extracttxt" 15 70 ; then
 				git init
-				git remote add origin git@github.com:Thermionix/multipass-usb.git
+				git remote add origin $repo
 				git fetch
 				git checkout -t origin/master
 			else
