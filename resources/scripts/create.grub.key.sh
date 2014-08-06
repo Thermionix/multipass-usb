@@ -65,7 +65,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	tmpdir=/tmp/$drivelabel
 	sudo mkdir -p $tmpdir
 
-	sudo mount $partboot $tmpdir
+	sudo mount -o uid=$(id -u),gid=$(id -g) $partboot $tmpdir
 
 	if ( grep -q ${DSK} /etc/mtab ); then
 		echo "# mounted $partboot at $tmpdir"
@@ -76,7 +76,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		sudo grub-install --target=i386-pc --skip-fs-probe --no-floppy --root-directory=$tmpdir ${DSK}
 		sleep 1
 
-		sudo chown -R `whoami` $tmpdir
+		sudo chown -R `whoami` $tmpdir || /bin/true
 
 		pushd $tmpdir
 			echo "configfile /resources/grub_sources/grub.head.cfg" > ./boot/grub/grub.cfg
