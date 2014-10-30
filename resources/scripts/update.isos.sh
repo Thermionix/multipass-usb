@@ -19,8 +19,8 @@ function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 	command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
 	command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
-	command -v xml_grep > /dev/null || { echo "## please install xml_grep" ; exit 1 ; }
-	command -v whiptail > /dev/null || { echo "whiptail (pkg libnewt) required for this script" ; exit 1 ; }
+	command -v xml_grep > /dev/null || { echo "## please install xml_grep (pkg perl-xml-twig)" ; exit 1 ; }
+	command -v whiptail > /dev/null || { echo "## whiptail (pkg libnewt) required for this script" ; exit 1 ; }
 }
 
 function check_isopath {
