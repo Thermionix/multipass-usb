@@ -4,7 +4,7 @@ ISO_PATH_REL=../..$ISO_PATH_GRUB
 SOURCES_PATH=../iso_sources/
 
 function detect_drive_label {
-	DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs blkid -s LABEL -o value)
+	DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs sudo blkid -s LABEL -o value)
 	[ ! -z $DRIVE_LABEL ] || { echo "## unable to detect drive label" ; exit 1 ; }
 }
 
