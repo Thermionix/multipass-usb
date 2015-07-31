@@ -21,6 +21,7 @@ function check_utilities {
 	command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
 	command -v xml_grep > /dev/null || { echo "## please install xml_grep (pkg perl-xml-twig)" ; exit 1 ; }
 	command -v whiptail > /dev/null || { echo "## whiptail (pkg libnewt) required for this script" ; exit 1 ; }
+	command -v isoinfo > /dev/null || { echo "## isoinfo (pkg cdrkit) required for this script" ; exit 1 ; }
 }
 
 function check_isopath {
