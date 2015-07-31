@@ -192,10 +192,12 @@ function generate_grub_cfg {
 		GRUB_FILE=$LATEST_ISO.grub.cfg
 		if [ -f $LATEST_ISO ] ; then
 			echo "# generating $GRUB_FILE"
+			ISO_LABEL=`isoinfo -d -i $LATEST_ISO | grep "Volume id" | awk '{print $3}'`
 			echo "$GRUB_CONTENTS" | \
 				sed -e "s#\(_iso_name_\|_file_name_\)#$LATEST_ISO#" \
 				-e "s#\(_iso_path_\|_file_path_\)#$ISO_PATH_GRUB$LATEST_ISO#" \
 				-e "s|_drive_label_|$DRIVE_LABEL|" \
+				-e "s|_iso_label_|$ISO_LABEL|" \
 				 > $GRUB_FILE
 		else
 			echo "# not generating $GRUB_FILE, $LATEST_ISO doesn't exist"
