@@ -46,8 +46,7 @@ ISO_PATH_REL=../..$ISO_PATH_GRUB
 
 OUTPUT_FILE=$ISO_PATH_REL$NAME
 
-#sudo biosdisk mkimage [-o option] [-i destination] /path/to/.exe
-
+# TODO : use -o option if passed
 sudo biosdisk mkimage -i $OUTPUT_FILE $FILE
 sudo chown `whoami`:`id -g -n` $OUTPUT_FILE
 
@@ -69,4 +68,6 @@ if [ -f $OUTPUT_FILE ] ; then
 		-e "s#_file_path_#$ISO_PATH_GRUB$NAME#" \
 		 > $GRUB_FILE
 fi
+
+# TODO : generate md5sum of image
 
