@@ -20,6 +20,7 @@ GRUB2 + USB pendrive + ISOs
 * check md5sum if available
 * generate a grub.cfg for the iso
 
-*/resources/scripts/ophcrack.tables.pull.sh* will
-* populate /tables/ for ophcrack livecd
-* tables_xp_free_small & tables_vista_free
+*/resources/scripts/generate.dos.image.sh* will
+* pull a *.exe file
+* generate a freedos img including the .exe
+* generate a grub.cfg for the freedos.img
