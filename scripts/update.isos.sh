@@ -178,7 +178,7 @@ function download_remote_iso {
 				fi
 			fi
 
-			generate_grub_cfg
+			regenerate_grub_cfg
 
 			if [ ! -z "$CURRENT_ISO_NAME" ]; then
 				echo "# Updated $CURRENT_ISO_NAME to $LATEST_REMOTE_FILE"

@@ -14,7 +14,7 @@ GRUB2 + USB pendrive + ISOs
 * .cfg are appended as bootable grub entries
 
 */scripts/update.isos.sh* will:
-* scan for *.conf in /scripts/grub_templates/
+* scan for *.source in /scripts/grub_templates/
 * if local file exists compare filenames
 * offer to download latest iso
 * check md5sum if available
