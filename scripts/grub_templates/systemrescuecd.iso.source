@@ -1,0 +1,3 @@
+source_url="http://sourceforge.net/projects/systemrescuecd/systemrescuecd-x86([0-9.-]+).iso$"
+
+grub_contents=`cat systemrescuecd.iso.grub.cfg`

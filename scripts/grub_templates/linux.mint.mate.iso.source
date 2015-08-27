@@ -1,0 +1,6 @@
+MINT_MIRROR="ftp://ftp.iinet.net.au/linux/linuxmint/stable/"
+MINT_VERSION=$(curl -s --disable-epsv --max-time 30 --list-only $MINT_MIRROR | sort -n | tail -n 1)
+source_url="$MINT_MIRROR/$MINT_VERSION/linuxmint-(\d.+)-mate-64bit(.*?).iso$"
+source_md5="md5sums.txt"
+
+grub_contents=`cat linux.mint.mate.iso.grub.cfg`
