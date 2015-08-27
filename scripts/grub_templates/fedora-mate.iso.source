@@ -1,0 +1,7 @@
+FEDORA_MIRROR="ftp://mirror.internode.on.net/pub/fedora/linux/releases/"
+FEDORA_VERSION=$(curl -s --disable-epsv --max-time 30 --list-only $FEDORA_MIRROR | sort -n | tail -n 1)
+source_url="$FEDORA_MIRROR/$FEDORA_VERSION/Live/x86_64/Fedora-Live-MATE_Compiz-x86_64-([0-9.-]+).iso$"
+
+#TODO : REMOTE_SHA256="Fedora-x86_64-$FEDORA_VERSION-CHECKSUM"
+
+grub_contents=`cat fedora-mate.iso.cfg`
