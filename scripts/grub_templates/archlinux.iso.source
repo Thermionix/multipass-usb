@@ -1,4 +1,4 @@
 source_url="ftp://ftp.iinet.net.au/linux/archlinux/iso/latest/archlinux-(.*?)-dual.iso$"
 source_md5="md5sums.txt"
 
-grub_contents=`cat archlinux.iso.cfg`
+grub_contents=`cat archlinux.iso.grub.cfg`

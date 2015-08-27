@@ -1,4 +1,4 @@
 source_url="ftp://ftp.cc.uoc.gr/mirrors/linux/antergos/iso/release/antergos-([0-9.]+)-x86_64.iso$"
 # http://mirrors.antergos.com/iso/release/
 
-grub_contents=`cat antergos.iso.cfg`
+grub_contents=`cat antergos.iso.grub.cfg`

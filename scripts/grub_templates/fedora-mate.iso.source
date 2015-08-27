@@ -4,4 +4,4 @@ source_url="$FEDORA_MIRROR/$FEDORA_VERSION/Live/x86_64/Fedora-Live-MATE_Compiz-x
 
 #TODO : REMOTE_SHA256="Fedora-x86_64-$FEDORA_VERSION-CHECKSUM"
 
-grub_contents=`cat fedora-mate.iso.cfg`
+grub_contents=`cat fedora-mate.iso.grub.cfg`
