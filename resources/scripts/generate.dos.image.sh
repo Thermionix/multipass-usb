@@ -46,6 +46,8 @@ ISO_PATH_REL=../..$ISO_PATH_GRUB
 
 OUTPUT_FILE=$ISO_PATH_REL$NAME
 
+# TODO : check if zip passed, unzip and search for *.exe
+
 # TODO : use -o option if passed
 sudo biosdisk mkimage -i $OUTPUT_FILE $FILE
 sudo chown `whoami`:`id -g -n` $OUTPUT_FILE
