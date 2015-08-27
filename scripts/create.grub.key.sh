@@ -79,7 +79,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 		sudo chown -R `whoami` $tmpdir || /bin/true
 
 		pushd $tmpdir
-			echo "configfile /resources/grub_sources/grub.head.cfg" > ./boot/grub/grub.cfg
+			echo "configfile /scripts/grub_resources/grub.head.cfg" > ./boot/grub/grub.cfg
 			mkdir -p ./bootisos/
 
 			repo="git@github.com:Thermionix/multipass-usb.git"

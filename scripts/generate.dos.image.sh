@@ -41,10 +41,11 @@ fi
 
 echo "Generation $NAME from $FILE"
 
-ISO_PATH_GRUB=/bootisos/
-ISO_PATH_REL=../..$ISO_PATH_GRUB
+pushd .. > /dev/null
 
-OUTPUT_FILE=$ISO_PATH_REL$NAME
+ISO_PATH=/bootisos/
+
+OUTPUT_FILE=$ISO_PATH$NAME
 
 # TODO : check if zip passed, unzip and search for *.exe
 
@@ -67,9 +68,10 @@ if [ -f $OUTPUT_FILE ] ; then
 
 	echo "$GRUB_CONTENTS" | \
 		sed -e "s#_file_name_#$NAME#" \
-		-e "s#_file_path_#$ISO_PATH_GRUB$NAME#" \
+		-e "s#_file_path_#$ISO_PATH$NAME#" \
 		 > $GRUB_FILE
 fi
 
 # TODO : generate md5sum of image
 
+popd > /dev/null

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-pushd ../../bootisos/
+pushd ../bootisos/ > /dev/null
 
 for d in `find . -type d`
 do
-pushd $d
+pushd $d > /dev/null
 for f in `find . -maxdepth 1 -type f \( -iname "*.iso" -o -iname "*.bin" -o -iname "*.img" \) -printf "%f\n"`
 do
 	if [ -f ${f}.md5 ]
@@ -17,8 +17,8 @@ do
 		cat $f.md5
 	fi
 done
-popd
+popd > /dev/null
 done
-popd
+popd > /dev/null
 
 read -n 1 -p "Press any key to continue..."
