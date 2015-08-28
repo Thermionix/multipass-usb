@@ -149,7 +149,10 @@ function download_remote_iso {
 			exit
 		fi
 
-		if $REMOTE_COMPRESSED ; then
+		if [ `type -t extract_remote`"" == 'function' ] ; then
+			# TODO : pass parameters?
+			extract_remote
+		elif [ $REMOTE_COMPRESSED ] ; then
 			extract_compressed
 		fi
 

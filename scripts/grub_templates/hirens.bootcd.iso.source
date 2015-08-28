@@ -5,6 +5,8 @@ FILE_REGEX="Hirens.BootCD.15.2.iso$"
 
 # TODO : provide command to extract zip 'Hiren's.BootCD.15.2.iso' only
 
+# function extract_remote { }
+
 source_skip=true
 
 grub_contents=$(cat <<'END_HEREDOC'

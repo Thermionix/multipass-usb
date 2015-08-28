@@ -32,3 +32,4 @@ GRUB2 + USB pendrive + ISOs
 *Longterm goals:*
 * Boot windows install ISOs (by side loading fira driver)
 * UEFI support?
+* Define ignore list (of *.source) for update.isos
