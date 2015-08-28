@@ -1,14 +1,17 @@
-REMOTE_URL="ftp://mirror.switch.ch/mirror/pentoo/Pentoo_amd64_default/"
-FILE_REGEX="pentoo-amd64(.*?).iso$"
+source_url="ftp://mirror.switch.ch/mirror/pentoo/Pentoo_amd64_default/pentoo-amd64(.*?).iso$"
+
 REMOTE_MD5=".DIGESTS"
 
-SKIP=true
+source_skip=true
 
-read -r -d '' GRUB_CONTENTS <<'EOF'
-menuentry "_iso_name_" { 
+grub_contents=$(cat <<'END_HEREDOC'
+if [ -f "_iso_path_" ]; then
+menuentry "_iso_name_" {
 	set iso_path="_iso_path_"
 	loopback loop $iso_path
 	linux (loop)/isolinux/pentoo root=/dev/ram0 init=/linuxrc aufs max_loop=256 dokeymap looptype=squashfs loop=/image.squashfs cdroot usbcore.autosuspend=1 console=tty0 nodetect isoboot=$iso_path
 	initrd (loop)/isolinux/pentoo.igz
 }
-EOF
+fi
+END_HEREDOC
+)

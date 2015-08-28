@@ -1,0 +1,16 @@
+source_url="http://www.seagate.com/files/www-content/support-content/downloads/seatools/_shared/downloads/SeaToolsDOS223ALL.ISO"
+#http://www.seagate.com/support/downloads/seatools/
+
+FILE_REGEX="seatools(.*?).iso$"
+
+grub_contents=$(cat <<'END_HEREDOC'
+if [ -f "_iso_path_" ]; then
+menuentry "_iso_name_" {
+	set iso_path="_iso_path_"
+	loopback loop $iso_path
+	linux16 /boot/grub/memdisk raw
+	initrd16 (loop)/SeaTools.ima
+}
+fi
+END_HEREDOC
+)
