@@ -1,6 +1,8 @@
 multipass-usb
 =============
 
+![screenshot-qemu multipass](https://cloud.githubusercontent.com/assets/622615/9536234/23bf2e98-4d6d-11e5-98f8-36b155740c3b.png)
+
 GRUB2 + USB pendrive + ISOs
 
 */scripts/create.grub.key.sh* will:
