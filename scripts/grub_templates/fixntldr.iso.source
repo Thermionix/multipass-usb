@@ -1,13 +1,18 @@
+source_url="http://tinyempire.com/notes/files/fixntldriso.zip"
 #http://tinyempire.com/notes/ntldrismissing.htm
 
-REMOTE_URL="http://tinyempire.com/notes/files/fixntldriso.zip"
 REMOTE_COMPRESSED=true
 FILE_REGEX="fixntldr.iso$"
 
-read -r -d '' GRUB_CONTENTS <<'EOF'
+ISO_SUB_PATH="windows-utilities/"
+
+grub_contents=$(cat <<'END_HEREDOC'
+if [ -f "_iso_path_" ]; then
 menuentry "_iso_name_" {
 	set iso_path="_iso_path_"
 	linux16 /boot/grub/memdisk iso
 	initrd16 $iso_path
 }
-EOF
+fi
+END_HEREDOC
+)

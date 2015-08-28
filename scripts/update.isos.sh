@@ -3,12 +3,11 @@ set -e
 
 ROOT_PATH=".."
 ISO_PATH=/bootisos/
-RELATIVE_ISO_PATH="$ROOT_PATH$ISO_PATH"
 TEMPLATES_PATH="$ROOT_PATH/scripts/grub_templates/"
 
 function detect_drive_label {
 	echo "# Detecting Drive Label"
-	DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs sudo blkid -s LABEL -o value)
+	DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs blkid -s LABEL -o value)
 	[ ! -z $DRIVE_LABEL ] || { echo "## unable to detect drive label" ; exit 1 ; }
 }
 
@@ -27,11 +26,6 @@ function check_utilities {
 	command -v whiptail > /dev/null || { echo "## whiptail (pkg libnewt) required for this script" ; exit 1 ; }
 	command -v isoinfo > /dev/null || { echo "## isoinfo (pkg cdrkit) required for this script" ; exit 1 ; }
 }
-
-function check_isopath {
-	mkdir -p $RELATIVE_ISO_PATH
-}
-
 
 function extract_compressed {
 	if [ -f $LATEST_REMOTE_FILE ] ; then
@@ -189,7 +183,7 @@ function download_remote_iso {
 
 function check_local {
 	echo "# Checking $ISO_PATH using $FILE_REGEX"
-	CURRENT_ISO_NAME=$(ls -t . | grep -m 1 -oiP "$FILE_REGEX")
+	CURRENT_ISO_NAME=$(ls -t . | grep -m 1 -oiP "$FILE_REGEX" || true)
 	if [ -z "$CURRENT_ISO_NAME" ]; then
 		echo "# Could not match local ISO!"
 	else
@@ -261,45 +255,56 @@ function regenerate_grub_cfg {
 
 function read_template {
 (
+	echo "#####################################"
 	pushd $TEMPLATES_PATH > /dev/null
-	source $f
+	source $1
 	popd > /dev/null
 
-	pushd $RELATIVE_ISO_PATH > /dev/null
-	echo "#####################################"
 	if [ -z $source_skip ]; then
 		if [ -n $source_url ] ; then
-			FILE_REGEX=`basename $source_url`
-			if [ -z "$FILE_REGEX" ]; then
-				echo "# FILE_REGEX not defined"
-			else
-				if $REGEN_CFG ; then
-					echo "# updating grub cfg using : $f"
-					regenerate_grub_cfg
-				else
-					echo "# updating iso using values from : $f"
-					check_remote
-				fi
+			if [ -n $ISO_SUB_PATH ] ; then
+				ISO_PATH=$ISO_PATH$ISO_SUB_PATH
 			fi
+			RELATIVE_ISO_PATH="$ROOT_PATH$ISO_PATH"
+			mkdir -p $RELATIVE_ISO_PATH
+			pushd $RELATIVE_ISO_PATH > /dev/null
+			
+			if [ -z "$FILE_REGEX" ]; then
+				FILE_REGEX=`basename $source_url`
+			fi
+
+			if $REGEN_CFG ; then
+				echo "# updating grub cfg using : $1"
+				regenerate_grub_cfg
+			else
+				echo "# updating iso using values from : $1"
+				check_remote
+			fi
+
+			popd > /dev/null
 		fi
 	else
-		echo "# skipping $f"
+		echo "# skipping $1"
 	fi
-	popd > /dev/null
 )
 }
 
 function load_templates {
 	for f in $(find $TEMPLATES_PATH -type f -name "*.source" -printf "%f\n")
 	do
-		read_template
+		read_template $f
 	done
 }
 
 check_utilities
 check_regen_cfg
 detect_drive_label
-check_isopath
-load_templates
+
+if [ -z "$1" ] ; then
+    load_templates
+else
+	read_template $1
+fi
+
 echo "# Done"
 

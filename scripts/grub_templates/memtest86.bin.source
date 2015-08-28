@@ -1,0 +1,18 @@
+
+latest_version=$(curl -s http://www.memtest.org/download/ --list-only | \
+grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^[0-9.].*' | sed -e 's#/$##' | sort -n | tail -n 1)
+
+source_url="http://www.memtest.org/download/$latest_version/memtest86+-$latest_version.bin"
+#http://memtest.org/download/
+
+FILE_REGEX="memtest86\+([0-9.-]+).bin$"
+
+grub_contents=$(cat <<'END_HEREDOC'
+if [ -f "_file_path_" ]; then
+menuentry "_file_name_" {
+	set file_path="_file_path_"
+	linux16 $file_path
+}
+fi
+END_HEREDOC
+)

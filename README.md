@@ -26,3 +26,9 @@ GRUB2 + USB pendrive + ISOs
 * pull a *.exe file
 * generate a freedos img including the .exe
 * generate a grub.cfg for the freedos.img
+
+
+
+*Longterm goals:*
+* Boot windows install ISOs (by side loading fira driver)
+* UEFI support?
