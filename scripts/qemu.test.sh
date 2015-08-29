@@ -5,7 +5,7 @@
 # sync writes any data buffered in memory out to disk. 
 sync
 
-usbdev=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | sed 's/[0-9]*//g')
+usbdev=$(mount | grep ${PWD%/*} | cut -f1 -d ' ' | sed 's/[0-9]*//g')
 
 # TODO : use qemu-system-i386 if not x64 system
 # -net user

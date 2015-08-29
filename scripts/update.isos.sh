@@ -7,7 +7,7 @@ TEMPLATES_PATH="$ROOT_PATH/scripts/grub_templates/"
 
 function detect_drive_label {
 	echo "# Detecting Drive Label"
-	DRIVE_LABEL=$(mount | grep ${PWD%/*/*} | cut -f1 -d ' ' | xargs blkid -s LABEL -o value)
+	DRIVE_LABEL=$(mount | grep ${PWD%/*} | cut -f1 -d ' ' | xargs blkid -s LABEL -o value)
 	[ ! -z $DRIVE_LABEL ] || { echo "## unable to detect drive label" ; exit 1 ; }
 }
 
