@@ -13,7 +13,7 @@ function detect_drive_label {
 
 function check_regen_cfg {
 	REGEN_CFG=false
-	if whiptail --defaultno --yesno "only regenerate .cfg files in $ISO_PATH_REL?\n(will not download anything)" 15 60 ; then
+	if whiptail --defaultno --yesno "only regenerate .cfg files in $ISO_PATH ?\n(will not download anything)" 15 60 ; then
 		REGEN_CFG=true
 	fi
 }
