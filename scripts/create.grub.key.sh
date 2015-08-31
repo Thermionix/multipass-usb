@@ -2,7 +2,7 @@
 set -e
 
 # call to execute script in a shell from web;
-# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/resources/scripts/create.grub.key.sh)"
+# bash -c "$(curl -fsSL https://github.com/Thermionix/multipass-usb/raw/master/scripts/create.grub.key.sh)"
 
 command -v parted > /dev/null || { echo "## please install parted" ; exit 1 ; }
 command -v syslinux > /dev/null || { echo "## please install syslinux" ; exit 1 ; }
@@ -12,11 +12,18 @@ command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
 command -v git > /dev/null || { echo "## please install git" ; exit 1 ; }
 command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required for this script" >&2 ; exit 1 ; }
 command -v sgdisk >/dev/null 2>&1 || { echo "sgdisk (pkg gptfdisk) required for this script" >&2 ; exit 1 ; }
+command -v mkfs.vfat >/dev/null 2>&1 || { echo "mkfs.vfat (pkg dosfstools) required" >&2 ; exit 1 ; }
+command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs (aur pkg udftools) required" >&2 ; exit 1 ; }
+[ $(lsmod | grep -o ^udf) ] || { echo "udf kernel module not loaded" >&2 ; exit 1 ; }
 
-disks=`sudo parted --list | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
+
+disks=`sudo parted --list --script | awk -F ": |, |Disk | " '/Disk \// { print $2" "$3$4 }'`
 DSK=$(whiptail --nocancel --menu "Select the Disk to install to" 18 45 10 $disks 3>&1 1>&2 2>&3)
 
 drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:" 10 40 "MULTIPASS01" 3>&1 1>&2 2>&3 | tr '[:lower:]' '[:upper:]')
+
+# TODO : ask to support UEFI or not?
+# TODO : choose main partition type at start of script?
 
 if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	if ( grep -q ${DSK} /etc/mtab ); then
@@ -27,53 +34,56 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 
 	echo "# wiping ${DSK}"
 	sudo dd if=/dev/zero of=${DSK} bs=512 count=4000
-	sudo sgdisk --zap-all --clear -g ${DSK}
+	sudo sgdisk --zap-all ${DSK} || /bin/true
 	sleep 1
 
 	echo "# partitioning ${DSK}"
-	sudo parted -s ${DSK} mklabel msdos
-	sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
 
-	case $(whiptail --menu "Choose a filesystem" 18 30 10 \
-		"1" "udf" \
-		"2" "ext4" \
-		"3" "vfat" \
-		"4" "exfat" \
-		3>&1 1>&2 2>&3) in
-			1)
-				command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs (udftools) required" >&2 ; exit 1 ; }
-				[ $(lsmod | grep -o ^udf) ] || { echo "udf kernel module not loaded" >&2 ; exit 1 ; }
+	echo "# creating partition table" 	
+	sudo parted -s ${DSK} mklabel gpt
+	#sudo parted -s ${DSK} mklabel msdos
 
-				sudo mkudffs -b 512 --utf8 --vid=$drivelabel --media-type=hd ${DSK}1
-			;;
-			2)
-				sudo mkfs.ext4 -L "${drivelabel}" ${DSK}1
-			;;
-			3)
-				sudo mkfs.vfat -n "${drivelabel}" ${DSK}1
-			;;
-			4)
-				sudo mkfs.exfat -n "${drivelabel}" ${DSK}1
-			;;
-	esac
+	#sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
+	#sudo sgdisk --new=1:0:0 --typecode=1:ef00 ${DSK}
+
+	echo "# creating bios_grub partition"
+	sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 2
+	sudo parted -s ${DSK} set 1 bios_grub on
+
+	echo "# creating efi partition"
+	sudo parted -s ${DSK} -a optimal unit MB -- mkpart ESI 2 32
+	sudo parted -s ${DSK} set 2 boot on
+	sudo parted -s ${DSK} name 2 $drivelabel-efi
+
+	echo "# creating boot partition"
+	sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 32 -1
+
+	sudo mkudffs -b 512 --utf8 --vid=$drivelabel --lvid=$drivelabel  --media-type=hd ${DSK}3
+	sudo mkfs.vfat -F 32 ${DSK}2
 
 	sleep 1
 	sudo partprobe ${DSK}
 	sleep 1
 	partboot="/dev/disk/by-label/$drivelabel"
+	partefi="/dev/disk/by-partlabel/$drivelabel-efi"
 
 	tmpdir=/tmp/$drivelabel
+	efidir=$tmpdir/boot/efi
 	sudo mkdir -p $tmpdir
-
 	sudo mount -o uid=$(id -u),gid=$(id -g) $partboot $tmpdir
+	sudo mkdir -p $efidir
+	sudo mount -o uid=$(id -u),gid=$(id -g) $partefi $efidir
 
 	if ( grep -q ${DSK} /etc/mtab ); then
 		echo "# mounted $partboot at $tmpdir"
 
-		trap 'echo unmounting $partboot ; sudo umount $tmpdir' EXIT
+		trap 'echo unmounting $partboot ; sudo umount $efidir ; sudo umount $tmpdir' EXIT
 
 		echo "# installing grub on ${DSK}"
-		sudo grub-install --target=i386-pc --skip-fs-probe --no-floppy --root-directory=$tmpdir ${DSK}
+		sudo grub-install --removable --target=x86_64-efi --root-directory=$tmpdir --efi-directory=$efidir --no-floppy ${DSK}
+		sudo grub-install --removable --target=i386-efi --root-directory=$tmpdir --efi-directory=$efidir --no-floppy ${DSK}
+		sudo grub-install --target=i386-pc --root-directory=$tmpdir --no-floppy ${DSK}
+		# --bootloader-id=$drivelabel
 		sleep 1
 
 		sudo chown -R `whoami` $tmpdir || /bin/true
