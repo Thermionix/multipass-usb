@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pushd ../bootisos/ > /dev/null
+pushd ../_ISO/ > /dev/null
 
 for d in `find . -type d`
 do

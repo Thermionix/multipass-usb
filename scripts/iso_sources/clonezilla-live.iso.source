@@ -1,3 +1,2 @@
 source_url="http://sourceforge.net/projects/clonezilla/clonezilla_live_stable/clonezilla-live-([0-9.-]+)-i686-pae.iso$"
 
-grub_contents=`cat clonezilla-live.iso.grub.cfg`

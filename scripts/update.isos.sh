@@ -2,21 +2,8 @@
 set -e
 
 ROOT_PATH=".."
-ISO_PATH=/bootisos/
-TEMPLATES_PATH="$ROOT_PATH/scripts/grub_templates/"
-
-function detect_drive_label {
-	echo "# Detecting Drive Label"
-	DRIVE_LABEL=$(mount | grep ${PWD%/*} | cut -f1 -d ' ' | xargs blkid -s LABEL -o value)
-	[ ! -z $DRIVE_LABEL ] || { echo "## unable to detect drive label" ; exit 1 ; }
-}
-
-function check_regen_cfg {
-	REGEN_CFG=false
-	if whiptail --defaultno --yesno "only regenerate .cfg files in $ISO_PATH_REL?\n(will not download anything)" 15 60 ; then
-		REGEN_CFG=true
-	fi
-}
+ISO_PATH=/_ISO/
+TEMPLATES_PATH="$ROOT_PATH/scripts/iso_sources/"
 
 function check_utilities {
 	command -v curl > /dev/null || { echo "## please install curl" ; exit 1 ; }
@@ -175,8 +162,6 @@ function download_remote_iso {
 				fi
 			fi
 
-			regenerate_grub_cfg
-
 			if [ ! -z "$CURRENT_ISO_NAME" ]; then
 				echo "# Updated $CURRENT_ISO_NAME to $LATEST_REMOTE_FILE"
 			fi
@@ -230,32 +215,6 @@ function check_remote {
 	fi
 }
 
-function generate_grub_cfg {
-	if [ -n "$grub_contents" ] ; then
-		GRUB_FILE=$LATEST_ISO.grub.cfg
-		if [ -f $LATEST_ISO ] ; then
-			echo "# generating $GRUB_FILE"
-			ISO_LABEL=`isoinfo -d -i $LATEST_ISO | grep "Volume id" | awk '{print $3}'`
-			echo "$grub_contents" | \
-				sed -e "s#\(_iso_name_\|_file_name_\)#$LATEST_ISO#" \
-				-e "s#\(_iso_path_\|_file_path_\)#$ISO_PATH$LATEST_ISO#" \
-				-e "s|_drive_label_|$DRIVE_LABEL|" \
-				-e "s|_iso_label_|$ISO_LABEL|" \
-				 > $GRUB_FILE
-		else
-			echo "# not generating $GRUB_FILE, $LATEST_ISO doesn't exist"
-		fi
-	fi
-}
-
-function regenerate_grub_cfg {
-	check_local
-	if [ ! -z $CURRENT_ISO_NAME ] ; then
-		LATEST_ISO=$CURRENT_ISO_NAME
-		generate_grub_cfg
-	fi
-}
-
 function read_template {
 (
 	echo "#####################################"
@@ -276,13 +235,8 @@ function read_template {
 				FILE_REGEX=`basename $source_url`
 			fi
 
-			if $REGEN_CFG ; then
-				echo "# updating grub cfg using : $1"
-				regenerate_grub_cfg
-			else
-				echo "# updating iso using values from : $1"
-				check_remote
-			fi
+			echo "# updating iso using values from : $1"
+			check_remote
 
 			popd > /dev/null
 		fi
@@ -300,8 +254,6 @@ function load_templates {
 }
 
 check_utilities
-check_regen_cfg
-detect_drive_label
 
 if [ -z "$1" ] ; then
     load_templates

@@ -1,3 +1,2 @@
 source_url="http://sourceforge.net/projects/ophcrack/ophcrack-vista-livecd-([0-9.-]+).iso$"
 
-grub_contents=`cat ophcrack.iso.grub.cfg`

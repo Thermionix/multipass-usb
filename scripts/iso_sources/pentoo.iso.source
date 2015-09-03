@@ -1,0 +1,6 @@
+source_url="ftp://mirror.switch.ch/mirror/pentoo/Pentoo_amd64_default/pentoo-amd64(.*?).iso$"
+
+REMOTE_MD5=".DIGESTS"
+
+source_skip=true
+

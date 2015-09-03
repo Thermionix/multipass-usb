@@ -7,13 +7,3 @@ FILE_REGEX="cd140201.iso$"
 
 ISO_SUB_PATH="windows-utilities/"
 
-grub_contents=$(cat <<'END_HEREDOC'
-if [ -f "_iso_path_" ]; then
-menuentry "_iso_name_" {
-	set iso_path="_iso_path_"
-	linux16 /boot/grub/memdisk iso
-	initrd16 $iso_path
-}
-fi
-END_HEREDOC
-)

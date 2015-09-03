@@ -1,0 +1,5 @@
+source_url="http://www.seagate.com/files/www-content/support-content/downloads/seatools/_shared/downloads/SeaToolsDOS223ALL.ISO"
+#http://www.seagate.com/support/downloads/seatools/
+
+FILE_REGEX="seatools(.*?).iso$"
+

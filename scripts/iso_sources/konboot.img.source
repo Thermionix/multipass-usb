@@ -11,13 +11,3 @@ ISO_SUB_PATH="windows-utilities/"
 
 source_skip=true
 
-grub_contents=$(cat <<'END_HEREDOC'
-if [ -f "_file_path_" ]; then
-menuentry "_file_name_" {
-	set file_path="_file_path_"
-	linux16 /boot/grub/memdisk
-	initrd16 $file_path
-}
-fi
-END_HEREDOC
-)

@@ -1,4 +1,3 @@
 source_url="ftp://mirror.internode.on.net/pub/opensuse/distribution/openSUSE-current/iso/openSUSE-([0-9.]+)-NET-x86_64.iso$"
 source_md5=".md5"
 
-grub_contents=`cat opensuse-net.iso.grub.cfg`

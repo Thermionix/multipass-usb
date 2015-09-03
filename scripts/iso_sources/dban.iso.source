@@ -1,3 +1,2 @@
 source_url="http://sourceforge.net/projects/dban/dban/dban-([0-9.-]+)_i586.iso$"
 
-grub_contents=`cat dban.iso.grub.cfg`

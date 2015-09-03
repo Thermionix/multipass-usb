@@ -1,6 +1,8 @@
 multipass-usb
 =============
 
+Repo is in transition state whilst moving toward compatability with Zalman VE200
+
 ![screenshot-qemu multipass](https://cloud.githubusercontent.com/assets/622615/9536234/23bf2e98-4d6d-11e5-98f8-36b155740c3b.png)
 
 GRUB2 + USB pendrive + ISOs
@@ -31,5 +33,4 @@ GRUB2 + USB pendrive + ISOs
 
 *Longterm goals:*
 * Boot windows install ISOs (by side loading fira driver)
-* UEFI support?
 * Define ignore list (of *.source) for update.isos

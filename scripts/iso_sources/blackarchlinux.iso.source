@@ -1,4 +1,3 @@
 source_url="ftp://ftp.kddilabs.jp/Linux/packages/blackarch/iso/blackarchlinux-live-([0-9.]+)-x86_64.iso$"
 # http://www.blackarch.org/blackarch/iso/
 
-grub_contents=`cat blackarchlinux.iso.grub.cfg`

@@ -1,3 +1,2 @@
 source_url="http://sourceforge.net/projects/gparted/gparted-live-stable/gparted-live([0-9.-]+)amd64.iso$"
 
-grub_contents=`cat gparted.iso.grub.cfg`
