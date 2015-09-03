@@ -5,18 +5,22 @@ command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
 command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
 command -v unzip > /dev/null || { echo "## please install unzip" ; exit 1 ; }
 command -v mkisofs > /dev/null || { echo "## please install mkisofs (pkg cdrtools)" ; exit 1 ; }
-# unix2dos
-# 7z
-# tar
+command -v unix2dos > /dev/null || { echo "## please install dos2unix" ; exit 1 ; }
+
+command -v 7z > /dev/null || { echo "## please install 7z" ; }
+command -v tar > /dev/null || { echo "## please install tar" ; }
+command -v unrar > /dev/null || { echo "## please install unrar" ; }
+command -v bunzip2 > /dev/null || { echo "## please install bunzip2" ; }
+command -v gunzip > /dev/null || { echo "## please install gunzip" ; }
 
 usage() {
 cat <<'END_HEREDOC'
 Usage:
-./generate.dos.image.sh -n "dell.bios.O755-A22.freedos.iso" -f http://downloads.dell.com/FOLDER01133147M/1/O755-A22.exe
+./generate.dos.image.sh -n "dell.bios.O755-A22.freedos.iso" -f http://downloads.dell.com/FOLDER01133147M/1/O755-A22.exe -x "O755-A22.exe"
 
 -n <name for image>
 -f <file or url>
--x <exe to run in autoexec>
+-x <exe/line for autorun.bat>
 
 The filename can be a file local to the system, or it can be an ftp  or
 http  URL to a raw BIOS file or BIOS floppy image. For example, passing
@@ -26,7 +30,7 @@ END_HEREDOC
 
 exit 1; }
 
-while getopts ":n:f:" o; do
+while getopts ":n:f:x:" o; do
     case "${o}" in
         n)
             NAME=${OPTARG}
@@ -34,6 +38,9 @@ while getopts ":n:f:" o; do
         f)
             FILE=${OPTARG}
             ;;
+		x)
+			autorun_line=${OPTARG}
+			;;
         *)
             usage
             ;;
@@ -57,20 +64,19 @@ function extract_base_img() {
 	unzip $FDOEMCD 'FDOEMCD/CDROOT/*' -d $WORKDIR
 }
 
-function write_autoexec() {
-if [ ! -z $autorun_arg ] ; then
-cat <<-'EOF' | tee AUTORUN.BAT
+function write_autorun() {
+if [ ! -z "$autorun_line" ] ; then
+echo "# Writing $autorun_line to AUTORUN.BAT"
+cat <<EOF | tee AUTORUN.BAT
 @ECHO OFF
 CLS
-$autorun_arg
+$autorun_line
 EOF
 unix2dos AUTORUN.BAT
 fi
 }
 
 function gen_iso() {
-
-#pushd $CDROOT/.. > /dev/null
 
 mkisofs \
 -b isolinux/isolinux.bin \
@@ -95,9 +101,9 @@ function check_file() {
 	fi
 
 	if [ ! -f $FILE ] ; then
-		if [ -z $FILE_URL ] ; then
+		if [ ! -z $FILE_URL ] ; then
 			echo "# Getting remote file"
-			# wget $FILE_URL
+			wget $FILE_URL -O $FILE
 		else
 			echo "# $FILE missing!"
 			exit 1
@@ -135,7 +141,7 @@ check_file
 extract_base_img
 pushd $CDROOT > /dev/null
 check_compressed_file
-write_autoexec
+write_autorun
 popd > /dev/null
 gen_iso
 rm -r $WORKDIR

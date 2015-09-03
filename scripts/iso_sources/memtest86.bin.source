@@ -7,5 +7,5 @@ source_url="http://www.memtest.org/download/$latest_version/memtest86+-$latest_v
 
 FILE_REGEX="memtest86\+([0-9.-]+).bin$"
 
-ISO_SUB_PATH="windows-utilities/"
+ISO_SUB_PATH="utilities/"
 
