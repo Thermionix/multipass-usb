@@ -1,2 +1,4 @@
 source_url="http://sourceforge.net/projects/dban/dban/dban-([0-9.-]+)_i586.iso$"
 
+ISO_SUB_PATH="utilities/"
+

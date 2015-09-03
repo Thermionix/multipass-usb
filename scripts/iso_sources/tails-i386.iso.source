@@ -1,0 +1,8 @@
+source_url="http://dl.amnesia.boum.org/tails/stable/tails-i386-(.+)/tails-i386-(.+).iso"
+
+# http://dl.amnesia.boum.org/tails/stable/tails-i386-1.5.1/tails-i386-1.5.1.iso
+# http://dl.amnesia.boum.org/tails/stable/tails-i386-1.5.1/tails-i386-1.5.1.iso.sig
+
+source_skip=true
+
+

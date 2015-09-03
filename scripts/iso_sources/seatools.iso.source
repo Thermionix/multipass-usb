@@ -3,3 +3,4 @@ source_url="http://www.seagate.com/files/www-content/support-content/downloads/s
 
 FILE_REGEX="seatools(.*?).iso$"
 
+ISO_SUB_PATH="utilities/"

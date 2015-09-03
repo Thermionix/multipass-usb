@@ -1,0 +1,4 @@
+source_url="http://cdimage.kali.org/current/kali-linux-(\d.+)-amd64.iso"
+
+source_skip=true
+
