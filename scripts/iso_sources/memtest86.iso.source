@@ -2,10 +2,12 @@
 latest_version=$(curl -s http://www.memtest.org/download/ --list-only | \
 grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^[0-9.].*' | sed -e 's#/$##' | sort -n | tail -n 1)
 
-source_url="http://www.memtest.org/download/$latest_version/memtest86+-$latest_version.bin"
+source_url="http://www.memtest.org/download/$latest_version/memtest86+-$latest_version.iso.zip"
 #http://memtest.org/download/
 
-FILE_REGEX="memtest86\+([0-9.-]+).bin$"
+REMOTE_COMPRESSED=true
+
+FILE_REGEX="memtest86\+([0-9.-]+).iso$"
 
 ISO_SUB_PATH="utilities/"
 
