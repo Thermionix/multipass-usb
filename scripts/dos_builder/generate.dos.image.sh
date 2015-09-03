@@ -1,21 +1,27 @@
 #!/bin/bash
 set -e
 
-command -v biosdisk > /dev/null || { echo "## please install biosdisk (aur pkg biosdisk-git)" ; exit 1 ; }
+command -v wget > /dev/null || { echo "## please install wget" ; exit 1 ; }
+command -v md5sum > /dev/null || { echo "## please install coreutils" ; exit 1 ; }
+command -v unzip > /dev/null || { echo "## please install unzip" ; exit 1 ; }
+command -v mkisofs > /dev/null || { echo "## please install mkisofs (pkg cdrtools)" ; exit 1 ; }
+# unix2dos
+# 7z
+# tar
 
 usage() {
 cat <<'END_HEREDOC'
 Usage:
-./generate.dos.image.sh -n "dell.bios.O755-A22.freedos.img" -f http://downloads.dell.com/FOLDER01133147M/1/O755-A22.exe
+./generate.dos.image.sh -n "dell.bios.O755-A22.freedos.iso" -f http://downloads.dell.com/FOLDER01133147M/1/O755-A22.exe
 
 -n <name for image>
 -f <file or url>
--o <Option to be passed to BIOS executable file at runtime>
+-x <exe to run in autoexec>
 
 The filename can be a file local to the system, or it can be an ftp  or
 http  URL to a raw BIOS file or BIOS floppy image. For example, passing
-"http://somedomain.com/700m_A00.exe"                                 or
-"ftp://ftp.dell.com/bios/700m_A00.exe" to biosdisk will work correctly.
+"http://somedomain.com/700m_A00.exe" or
+"ftp://ftp.dell.com/bios/700m_A00.exe" will work.
 END_HEREDOC
 
 exit 1; }
@@ -39,39 +45,103 @@ if [ -z "${NAME}" ] || [ -z "${FILE}" ]; then
     usage
 fi
 
-echo "Generation $NAME from $FILE"
+function check_base_img() {
+	echo "# Checking $FDOEMCD exists"
 
-pushd .. > /dev/null
-
-ISO_PATH=/bootisos/
-
-OUTPUT_FILE=$ISO_PATH$NAME
-
-# TODO : check if zip passed, unzip and search for *.exe
-
-# TODO : use -o option if passed
-sudo biosdisk mkimage -i $OUTPUT_FILE $FILE
-sudo chown `whoami`:`id -g -n` $OUTPUT_FILE
-
-GRUB_CONTENTS=$(cat <<'END_HEREDOC'
-menuentry "_file_name_" {
-	set file_path="_file_path_"
-	linux16 /boot/grub/memdisk
-	initrd16 $file_path
+	if [ ! -f $FDOEMCD ] ; then
+		wget -O $FDOEMCD http://www.fdos.org/bootdisks/ISO/FDOEMCD.builder.zip
+	fi
 }
-END_HEREDOC
-)
 
-GRUB_FILE=$OUTPUT_FILE.grub.cfg
-if [ -f $OUTPUT_FILE ] ; then
-	echo "# generating $GRUB_FILE"
+function extract_base_img() {
+	unzip $FDOEMCD 'FDOEMCD/CDROOT/*' -d $WORKDIR
+}
 
-	echo "$GRUB_CONTENTS" | \
-		sed -e "s#_file_name_#$NAME#" \
-		-e "s#_file_path_#$ISO_PATH$NAME#" \
-		 > $GRUB_FILE
+function write_autoexec() {
+if [ ! -z $autorun_arg ] ; then
+cat <<-'EOF' | tee AUTORUN.BAT
+@ECHO OFF
+CLS
+$autorun_arg
+EOF
+unix2dos AUTORUN.BAT
 fi
+}
 
-# TODO : generate md5sum of image
+function gen_iso() {
 
+#pushd $CDROOT/.. > /dev/null
+
+mkisofs \
+-b isolinux/isolinux.bin \
+-no-emul-boot \
+-boot-load-size 4 \
+-boot-info-table \
+-N \
+-J \
+-r \
+-c boot.catalog \
+-hide-joliet boot.catalog \
+-hide boot.catalog \
+-o "$NAME" \
+"$CDROOT"
+
+}
+
+function check_file() {
+	if $(echo $FILE | grep -qiP "^ftp://|^http://|^https://") ; then
+		FILE_URL=$FILE
+		FILE=$(basename $FILE)
+	fi
+
+	if [ ! -f $FILE ] ; then
+		if [ -z $FILE_URL ] ; then
+			echo "# Getting remote file"
+			# wget $FILE_URL
+		else
+			echo "# $FILE missing!"
+			exit 1
+		fi		
+	fi
+}
+
+function check_compressed_file() {
+	FILE_PATH="${OUTDIR%%/}/$FILE"
+	if [ -f $FILE_PATH ] ; then
+	case $FILE_PATH in
+	*.tar.bz2)   tar xvjf $FILE_PATH ;;
+	*.tar.gz)    tar xvzf $FILE_PATH ;;
+	*.bz2)       bunzip2 $FILE_PATH ;;
+	*.rar)       unrar x $FILE_PATH ;;
+	*.gz)        gunzip $FILE_PATH ;;
+	*.tar)       tar xvf $FILE_PATH ;;
+	*.tbz2)      tar xvjf $FILE_PATH ;;
+	*.tgz)       tar xvzf $FILE_PATH ;;
+	*.zip)       unzip $FILE_PATH ;;
+	*.7z)        7z x $FILE_PATH ;;
+	*)           cp $FILE_PATH . ;;
+	esac
+	fi
+}
+
+echo "Generating $NAME from $FILE"
+FDOEMCD="FDOEMCD.builder.zip"
+WORKDIR=`mktemp -d`
+OUTDIR="$PWD"
+CDROOT="${WORKDIR%%/}/FDOEMCD/CDROOT"
+pushd $OUTDIR > /dev/null
+check_base_img
+check_file
+extract_base_img
+pushd $CDROOT > /dev/null
+check_compressed_file
+write_autoexec
 popd > /dev/null
+gen_iso
+rm -r $WORKDIR
+md5sum $NAME > $NAME.md5
+popd > /dev/null
+
+## test iso
+# qemu-system-i386 -localtime -boot d -cdrom $NAME
+
