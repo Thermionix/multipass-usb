@@ -2,6 +2,7 @@
 set -e
 
 ROOT_PATH=".."
+
 ISO_PATH=/_ISO/
 TEMPLATES_PATH="$ROOT_PATH/scripts/iso_sources/"
 
