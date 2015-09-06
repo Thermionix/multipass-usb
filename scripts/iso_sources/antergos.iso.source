@@ -1,3 +1,7 @@
-source_url="ftp://ftp.cc.uoc.gr/mirrors/linux/antergos/iso/release/antergos-([0-9.]+)-x86_64.iso$"
-# http://mirrors.antergos.com/iso/release/
 
+latest_version=$(curl -s http://mirrors.antergos.com/iso/release/ --list-only | \
+grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^antergos-[0-9.].*' | sed -e 's#antergos-##' | sed -e 's#-.*##' | tail -n 1)
+
+source_url="http://mirrors.antergos.com/iso/release/antergos-minimal-$latest_version-x86_64.iso"
+
+FILE_REGEX="antergos-minimal-([0-9.]+)-x86_64.iso$"
