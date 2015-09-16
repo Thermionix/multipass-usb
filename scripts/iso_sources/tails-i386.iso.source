@@ -1,7 +1,12 @@
-source_url="http://dl.amnesia.boum.org/tails/stable/tails-i386-(.+)/tails-i386-(.+).iso"
 
-# http://dl.amnesia.boum.org/tails/stable/tails-i386-1.5.1/tails-i386-1.5.1.iso
-# http://dl.amnesia.boum.org/tails/stable/tails-i386-1.5.1/tails-i386-1.5.1.iso.sig
+latest_version=$(curl -s http://dl.amnesia.boum.org/tails/stable/ --list-only | \
+grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^tails-i386-[0-9.].*' | sed -e 's#/$##' -e 's#tails-i386-##' | sort -n | tail -n 1)
+
+source_url="http://dl.amnesia.boum.org/tails/stable/tails-i386-$latest_version/tails-i386-$latest_version.iso"
+
+#source_md5="tails-i386-$latest_version.iso.sig"
+
+FILE_REGEX="tails-i386-([0-9.-]+).iso$"
 
 source_skip=true
 
