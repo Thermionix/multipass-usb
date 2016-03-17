@@ -14,9 +14,9 @@ command -v whiptail >/dev/null 2>&1 || { echo "whiptail (pkg libnewt) required f
 command -v sgdisk >/dev/null 2>&1 || { echo "sgdisk (pkg gptfdisk) required for this script" >&2 ; exit 1 ; }
 
 #command -v mkfs.exfat >/dev/null 2>&1 || { echo "mkfs.exfat (pkg exfat-utils) required" >&2 ; exit 1 ; }
-command -v mkfs.vfat >/dev/null 2>&1 || { echo "mkfs.vfat (pkg dosfstools) required" >&2 ; exit 1 ; }
+#command -v mkfs.vfat >/dev/null 2>&1 || { echo "mkfs.vfat (pkg dosfstools) required" >&2 ; exit 1 ; }
 
-#command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs (aur pkg udftools) required" >&2 ; exit 1 ; }
+command -v mkudffs >/dev/null 2>&1 || { echo "mkudffs (aur pkg udftools) required" >&2 ; exit 1 ; }
 #[ $(lsmod | grep -o ^udf) ] || { echo "udf kernel module not loaded" >&2 ; exit 1 ; }
 
 
@@ -27,8 +27,8 @@ drivelabel=$(whiptail --nocancel --inputbox "please enter a label for the drive:
 
 # TODO : ask to support UEFI or not?
 
-if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
-	if ( grep -q ${DSK} /etc/mtab ); then
+if ( whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ) ; then
+	if ( grep -q ${DSK} /etc/mtab ) ; then
 		echo "# unmounting ${DSK}"
 		sudo umount ${DSK}* || /bin/true
 		sleep 1
@@ -42,7 +42,7 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	echo "# partitioning ${DSK}"
 
 	echo "# creating partition table" 	
-	sudo parted -s ${DSK} mklabel gpt
+
 	#sudo parted -s ${DSK} mklabel msdos
 
 	#sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
@@ -63,16 +63,24 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	#sudo mkudffs -b 512 --utf8 --vid=$drivelabel --lvid=$drivelabel  --media-type=hd ${DSK}3
 	#sudo mkfs.vfat -F 32 ${DSK}2
 
+	#sudo parted -s ${DSK} mklabel gpt
+	#sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
+	#sudo parted -s ${DSK} name 1 $drivelabel
+	#sudo parted -s ${DSK} set 1 bios_grub on
 
+	#sudo mkfs.vfat -F 32 ${DSK}1
+	#sudo mkfs.exfat -n $drivelabel ${DSK}1
+
+	sudo parted -s ${DSK} mklabel msdos
 	sudo parted -s ${DSK} -a optimal unit MB -- mkpart primary 1 -1
-	sudo parted -s ${DSK} name 1 $drivelabel
 
-	sudo mkfs.vfat -F 32 ${DSK}1
+	sudo mkudffs -b 512 --utf8 --vid=$drivelabel --lvid=$drivelabel --media-type=hd ${DSK}1
 
 	sleep 1
 	sudo partprobe ${DSK}
 	sleep 1
 	partboot="/dev/disk/by-label/$drivelabel"
+	#partboot="/dev/disk/by-partlabel/$drivelabel"
 	#partefi="/dev/disk/by-partlabel/$drivelabel-efi"
 
 	tmpdir=/tmp/$drivelabel
@@ -83,10 +91,10 @@ if whiptail --defaultno --yesno "COMPLETELY WIPE ${DSK}?" 8 40 ; then
 	#sudo mkdir -p $efidir
 	#sudo mount -o uid=$(id -u),gid=$(id -g) $partefi $efidir
 
-	if ( grep -q ${DSK} /etc/mtab ); then
+	if ( grep -q ${DSK} /etc/mtab ) ; then
 		echo "# mounted $partboot at $tmpdir"
 
-		trap 'echo unmounting $partboot ; ; sudo umount $tmpdir' EXIT
+		trap 'echo unmounting $partboot ; sudo umount $tmpdir' EXIT
 		#sudo umount $efidir
 
 		echo "# installing grub on ${DSK}"
