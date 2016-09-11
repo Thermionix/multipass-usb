@@ -1,7 +1,10 @@
+ANTERGOS_MIRROR="https://mirrorservice.org/sites/repo.antergos.com/iso/release/"
+ANTERGOS_VERSION=$(curl -s $ANTERGOS_MIRROR --list-only | grep href | sed 's/.*href="//' | \
+sed 's/".*//' | grep '^antergos-[0-9.].*' | sed -e 's#antergos-##' | sed -e 's#-.*##' | tail -n 1)
 
-latest_version=$(curl -s http://mirrors.antergos.com/iso/release/ --list-only | \
-grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^antergos-[0-9.].*' | sed -e 's#antergos-##' | sed -e 's#-.*##' | tail -n 1)
-
-source_url="http://mirrors.antergos.com/iso/release/antergos-minimal-$latest_version-x86_64.iso"
+source_url="http://mirrors.antergos.com/iso/release/antergos-minimal-$ANTERGOS_VERSION-x86_64.iso"
 
 FILE_REGEX="antergos-minimal-([0-9.]+)-x86_64.iso$"
+
+#TODO : REMOTE_SIG="antergos-minimal-$ANTERGOS_VERSION-x86_64.iso.sig"
+

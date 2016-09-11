@@ -8,6 +8,8 @@ source_url="http://dl.amnesia.boum.org/tails/stable/tails-i386-$latest_version/t
 
 FILE_REGEX="tails-i386-([0-9.-]+).iso$"
 
-source_skip=true
+#source_skip=true
 
-
+# check signed with https://tails.boum.org/torrents/files/tails-i386-2.5.iso.sig
+# gpg --keyid-format 0xlong --verify tails-i386-2.5.iso.sig tails-i386-2.5.iso 
+# grep Good signature
