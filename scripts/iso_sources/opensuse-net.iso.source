@@ -1,4 +1,5 @@
-source_url="ftp://mirror.internode.on.net/pub/opensuse/distribution/openSUSE-current/iso/openSUSE-([0-9.]+)-NET-x86_64.iso$"
+source_url="ftp://mirror.internode.on.net/pub/opensuse/distribution/openSUSE-current/iso/openSUSE-Leap-([0-9.]+)-NET-x86_64.iso$"
 source_md5=".md5"
 
-source_skip=true
+#source_skip=true
+
