@@ -1,0 +1,7 @@
+source_url="http://mirror.slitaz.org/iso/rolling/slitaz-rolling.iso"
+
+FILE_REGEX="slitaz-rolling.iso$"
+
+# TODO : http://mirror.slitaz.org/iso/rolling/slitaz-rolling.md5
+
+
