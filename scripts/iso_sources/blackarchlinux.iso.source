@@ -1,3 +1,5 @@
-source_url="ftp://ftp.kddilabs.jp/Linux/packages/blackarch/iso/blackarchlinux-live-([0-9.]+)-x86_64.iso$"
+source_url="ftp://ftp.halifax.rwth-aachen.de/blackarch/iso/blackarchlinux-live-([0-9.]+)-x86_64.iso$"
+# ftp://ftp.kddilabs.jp/Linux/packages/blackarch/iso/blackarchlinux-live-([0-9.]+)-x86_64.iso$
 # http://www.blackarch.org/blackarch/iso/
-
+# http://blackarch.mirror.digitalpacific.com.au/iso/blackarchlinux-live-2017.01.28-x86_64.iso
+# ftp://ftp.halifax.rwth-aachen.de/blackarch/iso/blackarchlinux-live-2017.03.01-x86_64.iso
