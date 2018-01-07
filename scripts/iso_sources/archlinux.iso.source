@@ -1,3 +1,2 @@
-source_url="ftp://ftp.iinet.net.au/linux/archlinux/iso/latest/archlinux-(.*?)-dual.iso$"
+source_url="ftp://ftp.iinet.net.au/linux/archlinux/iso/latest/archlinux-(.*?)-x86_64.iso$"
 source_md5="md5sums.txt"
-
