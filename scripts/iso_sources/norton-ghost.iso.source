@@ -1,0 +1,8 @@
+source_url="ftp://ftp.symantec.com/public/english_us_canada/linked_files/Ghost/NGH1501_AllWin_English_SrdOnly.iso"
+
+FILE_REGEX="NGH1501_AllWin_English_SrdOnly.iso$"
+ISO_SUB_PATH="utilities/"
+
+# https://archive.org/download/Norton.Ghost.11.5.Corporate.DOS.Boot.CD_201711/Norton.Ghost.11.5.Corporate.DOS.Boot.CD.iso
+
+

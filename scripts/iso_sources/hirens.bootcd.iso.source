@@ -1,12 +1,6 @@
-source_url="http://www.hirensbootcd.org/files/Hirens.BootCD.15.2.zip"
+source_url="https://www.hirensbootcd.org/files/HBCD_PE_x64.iso"
 
-REMOTE_COMPRESSED=true
-FILE_REGEX="Hirens.BootCD.15.2.iso$"
-
-# TODO : provide command to extract zip 'Hiren's.BootCD.15.2.iso' only
-
-# function extract_remote { }
+FILE_REGEX="HBCD_PE_x64.iso$"
 
 source_skip=true
-
 

@@ -1,0 +1,2 @@
+source_url="ftp://ftp.osuosl.org/pub/trk/trinity-rescue-kit.([0-9.]+)-build-([0-9.]+).iso$"
+source_md5=".md5"

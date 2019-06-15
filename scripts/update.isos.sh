@@ -150,17 +150,19 @@ function download_remote_iso {
 			fi
 
 			if [ ! -z "$CURRENT_ISO_NAME" ]; then
-				echo "# Updated $CURRENT_ISO_NAME to $LATEST_REMOTE_FILE"
+				if [ "$LATEST_REMOTE_FILE" != "$CURRENT_ISO_NAME" ] ; then
+					echo "# Updated $CURRENT_ISO_NAME to $LATEST_REMOTE_FILE"
 
-				echo "# Removing $CURRENT_ISO_NAME"
-				rm $CURRENT_ISO_NAME
+					echo "# Removing $CURRENT_ISO_NAME"
+					rm $CURRENT_ISO_NAME
 
-				if [ -f $CURRENT_ISO_NAME.md5 ] ; then
-					rm $CURRENT_ISO_NAME.md5
-				fi
+					if [ -f $CURRENT_ISO_NAME.md5 ] ; then
+						rm $CURRENT_ISO_NAME.md5
+					fi
 
-				if [ -f $CURRENT_ISO_NAME.grub.cfg ] ; then
-					rm $CURRENT_ISO_NAME.grub.cfg
+					if [ -f $CURRENT_ISO_NAME.grub.cfg ] ; then
+						rm $CURRENT_ISO_NAME.grub.cfg
+					fi
 				fi
 			fi
 

@@ -1,0 +1,7 @@
+source_url="https://visopsys.org/files/partlogic/partlogic-0.77-iso.zip"
+
+REMOTE_COMPRESSED=true
+FILE_REGEX="partlogic-0.77.iso$"
+
+ISO_SUB_PATH="utilities/"
+
