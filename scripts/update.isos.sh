@@ -113,15 +113,8 @@ function pull_md5 {
 }
 
 function download_remote_iso {
-	if confirm "download $LATEST_REMOTE_FILE? [y/N]" ; then
+	if confirm "download $LATEST_REMOTE_FILE? [Y/N]" ; then
 		pull_md5
-
-		remove_original=false
-		if [ ! -z $CURRENT_ISO_NAME ]; then
-			if confirm "remove $CURRENT_ISO_NAME? if successful [Y/n]" ; then
-				remove_original=true
-			fi
-		fi
 
 		wget $LATEST_REMOTE
 
@@ -158,9 +151,7 @@ function download_remote_iso {
 
 			if [ ! -z "$CURRENT_ISO_NAME" ]; then
 				echo "# Updated $CURRENT_ISO_NAME to $LATEST_REMOTE_FILE"
-			fi
 
-			if $remove_original ; then
 				echo "# Removing $CURRENT_ISO_NAME"
 				rm $CURRENT_ISO_NAME
 
@@ -172,6 +163,7 @@ function download_remote_iso {
 					rm $CURRENT_ISO_NAME.grub.cfg
 				fi
 			fi
+
 		fi
 	fi
 }

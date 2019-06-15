@@ -1,0 +1,15 @@
+
+latest_version=$(curl -s https://mirrors.edge.kernel.org/tails/stable/ --list-only | \
+grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^tails-amd64-[0-9.].*' | sed -e 's#/$##' -e 's#tails-amd64-##' | sort -n | tail -n 1)
+
+source_url="https://mirrors.edge.kernel.org/tails/stable/tails-amd64-$latest_version/tails-amd64-$latest_version.iso"
+
+#source_md5="tails-amd64-$latest_version.iso.sig"
+
+FILE_REGEX="tails-amd64-([0-9.-]+).iso$"
+
+#source_skip=true
+
+# check signed with https://tails.boum.org/torrents/files/tails-amd64-2.5.iso.sig
+# gpg --keyid-format 0xlong --verify tails-amd64-2.5.iso.sig tails-amd64-2.5.iso 
+# grep Good signature

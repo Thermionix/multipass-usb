@@ -1,6 +1,6 @@
-source_url="http://www.hdt-project.org/raw-attachment/wiki/hdt-0.5.0/hdt-0.5.2.iso"
+source_url="http://www.serverelements.com/bin/CORE3_Hardware_Detection_Tool.iso"
 
-FILE_REGEX="hdt-0.5.2.iso$"
+FILE_REGEX="CORE3_Hardware_Detection_Tool.iso$"
 
 # TODO : hdt-0.5.2.checksums
 
