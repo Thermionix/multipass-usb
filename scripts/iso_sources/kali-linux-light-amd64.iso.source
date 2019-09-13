@@ -4,7 +4,7 @@ grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^kali-[0-9.].*' | sed -e 
 
 source_url="https://cdimage.kali.org/kali-$latest_version/kali-linux-light-$latest_version-amd64.iso"
 
-FILE_REGEX="kali-linux-mini-([0-9.-]+)-amd64.iso$"
+FILE_REGEX="kali-linux-light-([0-9.-]+)-amd64.iso$"
 
 # https://cdimage.kali.org/kali-$latest_version/SHA256SUMS
 
