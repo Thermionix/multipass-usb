@@ -6,6 +6,7 @@
 # Are you really crazy enough to be using this? It might blow your data
 # into tiny little useless chunks.
 
+cd "../_ISO/"
 
 trap 'abort' 1 2 15
 
@@ -29,7 +30,7 @@ declare -i numfiles=0
 
 #The maximum size of a file we can easily cache in ram
 declare -i maxsize=$((`awk '/MemTotal/ {print $2}' /proc/meminfo`*1024))
-(( maxsize-= `awk '/Mapped/ {print $2}' /proc/meminfo` ))
+(( maxsize-= `awk '/^Mapped/ {print $2}' /proc/meminfo` ))
 (( maxsize/= 2))
 
 if [[ -a tmpfile || -a dirlist  ]] ; then
