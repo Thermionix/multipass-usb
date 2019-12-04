@@ -1,0 +1,4 @@
+UBUNTU_MIRROR="ftp://ftp.iinet.net.au/linux/ubuntu/releases/"
+UBUNTU_VERSION=$(curl -s --disable-epsv --max-time 30 --list-only $UBUNTU_MIRROR | sort -n | tail -n 1)
+source_url="$UBUNTU_MIRROR$UBUNTU_VERSION/ubuntu-(\d.+)-live-server-amd64.iso$"
+source_md5="MD5SUMS"

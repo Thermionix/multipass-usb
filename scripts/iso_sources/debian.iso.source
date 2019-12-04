@@ -1,0 +1,4 @@
+source_url="ftp://mirror.internode.on.net/pub/debian-cd/current/amd64/iso-cd/debian-([0-9.]+)-amd64-netinst.iso$"
+source_md5="MD5SUMS"
+
+
