@@ -3,3 +3,4 @@ MINT_VERSION=$(curl -s --disable-epsv --max-time 30 --list-only $MINT_MIRROR | s
 source_url="$MINT_MIRROR$MINT_VERSION/linuxmint-(\d.+)-mate-64bit(.*?).iso$"
 source_md5="md5sums.txt"
 
+source_skip=true

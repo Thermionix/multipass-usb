@@ -5,4 +5,4 @@ ISO_SUB_PATH="utilities/"
 
 # https://archive.org/download/Norton.Ghost.11.5.Corporate.DOS.Boot.CD_201711/Norton.Ghost.11.5.Corporate.DOS.Boot.CD.iso
 
-
+source_skip=true

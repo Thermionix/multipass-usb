@@ -1,7 +1,7 @@
 source_url="https://visopsys.org/files/visopsys/visopsys-0.84-iso.zip"
 
 REMOTE_COMPRESSED=true
-FILE_REGEX="partlogic-0.84.iso$"
+FILE_REGEX="visopsys-0.84.iso$"
 
 ISO_SUB_PATH="utilities/"
 
