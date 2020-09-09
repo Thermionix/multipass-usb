@@ -1,0 +1,10 @@
+
+latest_version=$(curl -s https://cdimage.kali.org/ --list-only | \
+grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^kali-[0-9.].*' | sed -e 's#/$##' -e 's#kali-##' | sort -n | tail -n 1)
+
+source_url="https://cdimage.kali.org/kali-$latest_version/kali-linux-$latest_version-live-amd64.iso"
+
+FILE_REGEX="kali-linux-([0-9.-]+)-live-amd64.iso$"
+
+# https://cdimage.kali.org/kali-$latest_version/SHA256SUMS
+

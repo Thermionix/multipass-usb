@@ -1,7 +1,9 @@
 FEDORA_MIRROR="ftp://mirror.internode.on.net/pub/fedora/linux/releases/"
 FEDORA_VERSION=$(curl -s --disable-epsv --max-time 30 --list-only $FEDORA_MIRROR | sort -n | tail -n 1)
 
-source_url="$FEDORA_MIRROR$FEDORA_VERSION/Spins/x86_64/iso/Fedora-MATE_Compiz-Live-x86_64-([0-9.-]+).iso$"
+source_url="$FEDORA_MIRROR$FEDORA_VERSION/Spins/x86_64/iso/Fedora-KDE-Live-x86_64-([0-9.-]+).iso$"
 
 #TODO : REMOTE_SHA256="Fedora-Spins-$FEDORA_VERSION-([0-9.-]+)-x86_64-CHECKSUM"
+
+#source_skip=true
 

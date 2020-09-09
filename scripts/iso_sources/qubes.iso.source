@@ -1,0 +1,8 @@
+
+latest_version=$(curl -s https://mirrors.edge.kernel.org/qubes/iso/ --list-only | \
+grep href | sed 's/.*href="//' | sed 's/".*//' | grep '^Qubes-R[0-9.].*-x86_64.iso$' | tail -n 1)
+
+source_url="https://mirrors.edge.kernel.org/qubes/iso/$latest_version"
+
+FILE_REGEX="^Qubes-R[0-9.].*-x86_64.iso$"
+
